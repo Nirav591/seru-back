@@ -9,6 +9,14 @@ class Question {
         );
         return result.insertId; // Return the ID of the newly created question
     }
+
+    static async findByChapterAndQuestion(chapter_id, question) {
+        const [rows] = await db.execute(
+            'SELECT * FROM questions WHERE chapter_id = ? AND question = ?',
+            [chapter_id, question]
+        );
+        return rows[0]; // Return the first matching question
+    }
 }
 
 class Option {

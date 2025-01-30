@@ -15,6 +15,13 @@ const createQuestion = async (req, res) => {
         const { chapter_id, question, type, noOfAnswer, options } = req.body;
         console.log('Extracted Data:', { chapter_id, question, type, noOfAnswer, options }); // Log extracted data
 
+        // Check if the question already exists for this chapter
+        const existingQuestion = await Question.findByChapterAndQuestion(chapter_id, question);
+        if (existingQuestion) {
+            console.log('Question already exists:', existingQuestion); // Log existing question
+            return res.status(400).json({ message: 'Question already exists for this chapter' });
+        }
+
         // Create the question
         console.log('Creating question...');
         const questionId = await Question.create({ chapter_id, question, type, noOfAnswer });
@@ -34,5 +41,6 @@ const createQuestion = async (req, res) => {
         res.status(500).json({ message: 'Server error' });
     }
 };
+
 
 module.exports = { createQuestion };
