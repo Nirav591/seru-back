@@ -2,6 +2,8 @@ const { Question, Option } = require('../models/questionModel');
 const { questionSchema } = require('../validators/questionValidators');
 
 const createQuestion = async (req, res) => {
+    console.log(req , "ref");
+    
     try {
         // Validate the request body
         const { error } = questionSchema.validate(req.body);
