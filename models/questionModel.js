@@ -17,7 +17,18 @@ class Question {
         );
         return rows[0]; // Return the first matching question
     }
+
+    static async findAll() {
+        const [rows] = await db.execute('SELECT * FROM questions ORDER BY created_at DESC');
+        return rows; // Return all questions
+    }
+
+    static async findByChapterId(chapter_id) {
+        const [rows] = await db.execute('SELECT * FROM questions WHERE chapter_id = ? ORDER BY created_at DESC', [chapter_id]);
+        return rows; // Return questions for a specific chapter
+    }
 }
+
 
 class Option {
     static async create(option) {

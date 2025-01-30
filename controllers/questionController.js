@@ -42,5 +42,34 @@ const createQuestion = async (req, res) => {
     }
 };
 
+const getAllQuestions = async (req, res) => {
+    try {
+        console.log('Fetching all questions...');
+        const questions = await Question.findAll();
+        res.status(200).json({ questions });
+    } catch (error) {
+        console.error('Error in getAllQuestions:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
 
-module.exports = { createQuestion };
+// Get questions by chapter ID
+const getQuestionsByChapterId = async (req, res) => {
+    try {
+        const { chapter_id } = req.params;
+        console.log('Fetching questions for chapter ID:', chapter_id);
+
+        const questions = await Question.findByChapterId(chapter_id);
+        if (questions.length === 0) {
+            return res.status(404).json({ message: 'No questions found for this chapter' });
+        }
+
+        res.status(200).json({ questions });
+    } catch (error) {
+        console.error('Error in getQuestionsByChapterId:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+
+module.exports = { createQuestion , getAllQuestions, getQuestionsByChapterId  };
