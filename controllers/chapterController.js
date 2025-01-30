@@ -25,4 +25,15 @@ const createChapter = async (req, res) => {
     }
 };
 
-module.exports = { createChapter };
+const getAllChapters = async (req, res) => {
+    try {
+        const chapters = await Chapter.findAll();
+        res.status(200).json({ chapters });
+    } catch (error) {
+        console.error('Error in getAllChapters:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+
+module.exports = { createChapter , getAllChapters};

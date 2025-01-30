@@ -1,8 +1,10 @@
 const express = require('express');
-const { createChapter } = require('../controllers/chapterController.js');
+const { createChapter , getAllChapters } = require('../controllers/chapterController.js');
 
 const router = express.Router();
 
 router.post('/chapters', createChapter);
+router.get('/chapters', getAllChapters); // Add this route
+
 
 module.exports = router;
