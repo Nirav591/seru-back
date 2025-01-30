@@ -15,7 +15,7 @@ class Option {
     static async create(option) {
         const { question_id, option: text, isAnswer } = option;
         await db.execute(
-            'INSERT INTO options (question_id, option, isAnswer) VALUES (?, ?, ?)',
+            'INSERT INTO options (question_id, `option`, isAnswer) VALUES (?, ?, ?)',
             [question_id, text, isAnswer]
         );
     }
