@@ -16,7 +16,15 @@ const createExamQuestion = async (req, res) => {
         const { exam_test_id, question, type, noOfAnswer, options } = req.body;
         console.log('Extracted Data:', { exam_test_id, question, type, noOfAnswer, options }); // Log extracted data
 
+        // Check if the question already exists for this exam test
+        const existingQuestion = await ExamQuestion.findByExamTestAndQuestion(exam_test_id, question);
+        if (existingQuestion) {
+            console.log('Question already exists:', existingQuestion); // Log existing question
+            return res.status(400).json({ message: 'Question already exists for this exam test' });
+        }
+
         // Create the exam question
+        console.log('Creating exam question...');
         const examQuestionId = await ExamQuestion.create({ exam_test_id, question, type, noOfAnswer });
         console.log('Exam question created with ID:', examQuestionId);
 
