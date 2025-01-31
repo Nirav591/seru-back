@@ -4,49 +4,33 @@ const { examQuestionSchema } = require('../validators/examQuestionValidators');
 
 const createExamQuestion = async (req, res) => {
     try {
-        console.log('Request Body:', req.body);
+        console.log('Request Body:', req.body); // Log the request body
 
-        // Validate request body
+        // Validate the request body using the schema
         const { error } = examQuestionSchema.validate(req.body);
         if (error) {
-            console.log('Validation Error:', error.details[0].message);
+            console.log('Validation Error:', error.details[0].message); // Log validation error
             return res.status(400).json({ message: error.details[0].message });
         }
 
         const { exam_test_id, question, type, noOfAnswer, options } = req.body;
-        console.log('Extracted Data:', { exam_test_id, question, type, noOfAnswer, options });
-
-        // Validate options array
-        if (!Array.isArray(options) || options.length === 0) {
-            console.error("Error: options array is missing or empty:", options);
-            return res.status(400).json({ message: "Options are required." });
-        }
+        console.log('Extracted Data:', { exam_test_id, question, type, noOfAnswer, options }); // Log extracted data
 
         // Create the exam question
         const examQuestionId = await ExamQuestion.create({ exam_test_id, question, type, noOfAnswer });
-        if (!examQuestionId) {
-            console.error("Error: Exam question ID is undefined.");
-            return res.status(500).json({ message: "Failed to create exam question." });
-        }
         console.log('Exam question created with ID:', examQuestionId);
 
-        // Insert options
+        // Create the options
         console.log('Creating options...');
         for (const option of options) {
-            const { option_text, isAnswer } = option;
-            if (!option_text) {
-                console.error("Error: Missing option_text", option);
-                return res.status(400).json({ message: "Each option must have text." });
-            }
-
-            console.log('Inserting option:', option);
-            await ExamOption.create({ exam_question_id: examQuestionId, option_text, isAnswer });
+            console.log('Inserting option:', option); // Log each option
+            await ExamOption.create({ exam_question_id: examQuestionId, ...option });
         }
 
         console.log('Exam question and options created successfully');
         res.status(201).json({ message: 'Exam question created successfully' });
     } catch (error) {
-        console.error('Error in createExamQuestion:', error);
+        console.error('Error in createExamQuestion:', error); // Log the full error
         res.status(500).json({ message: 'Server error' });
     }
 };
