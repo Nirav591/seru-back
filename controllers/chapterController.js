@@ -56,4 +56,4 @@ const deleteChapter = async (req, res) => {
 };
 
 
-module.exports = { createChapter , getAllChapters, deleteChapter};
+module.exports = { createChapter , getAllChapters, deleteChapter };
