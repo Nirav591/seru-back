@@ -19,6 +19,10 @@ class Chapter {
         const [rows] = await db.execute('SELECT * FROM chapters ORDER BY index_number ASC');
         return rows;
     }
+    static async findById(id) {
+        const [rows] = await db.execute('SELECT * FROM chapters WHERE id = ?', [id]);
+        return rows[0]; // Return the chapter if found
+    }
 }
 
 module.exports = Chapter;

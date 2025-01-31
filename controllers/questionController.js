@@ -15,6 +15,13 @@ const createQuestion = async (req, res) => {
         const { chapter_id, question, type, noOfAnswer, options } = req.body;
         console.log('Extracted Data:', { chapter_id, question, type, noOfAnswer, options }); // Log extracted data
 
+        // Check if the chapter exists
+        const chapter = await Chapter.findById(chapter_id);
+        if (!chapter) {
+            console.log('Chapter not found with ID:', chapter_id); // Log chapter not found
+            return res.status(404).json({ message: 'Chapter not found' });
+        }
+
         // Check if the question already exists for this chapter
         const existingQuestion = await Question.findByChapterAndQuestion(chapter_id, question);
         if (existingQuestion) {
@@ -59,6 +66,13 @@ const getQuestionsByChapterId = async (req, res) => {
         const { chapter_id } = req.params;
         console.log('Fetching questions for chapter ID:', chapter_id);
 
+        // Check if the chapter exists
+        const chapter = await Chapter.findById(chapter_id);
+        if (!chapter) {
+            console.log('Chapter not found with ID:', chapter_id); // Log chapter not found
+            return res.status(404).json({ message: 'Chapter not found' });
+        }
+
         const questions = await Question.findByChapterId(chapter_id);
         if (questions.length === 0) {
             return res.status(404).json({ message: 'No questions found for this chapter' });
@@ -71,5 +85,4 @@ const getQuestionsByChapterId = async (req, res) => {
     }
 };
 
-
-module.exports = { createQuestion , getAllQuestions, getQuestionsByChapterId  };
+module.exports = { createQuestion, getAllQuestions, getQuestionsByChapterId };
