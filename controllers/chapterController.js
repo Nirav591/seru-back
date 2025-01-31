@@ -35,5 +35,25 @@ const getAllChapters = async (req, res) => {
     }
 };
 
+const deleteChapter = async (req, res) => {
+    try {
+        const { id } = req.params;
+        console.log('Deleting chapter with ID:', id);
 
-module.exports = { createChapter , getAllChapters};
+        // Check if the chapter exists
+        const chapter = await Chapter.findById(id);
+        if (!chapter) {
+            return res.status(404).json({ message: 'Chapter not found' });
+        }
+
+        // Delete the chapter
+        await Chapter.deleteById(id);
+        res.status(200).json({ message: 'Chapter deleted successfully' });
+    } catch (error) {
+        console.error('Error in deleteChapter:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+
+module.exports = { createChapter , getAllChapters, deleteChapter};

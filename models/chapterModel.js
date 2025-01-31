@@ -23,6 +23,9 @@ class Chapter {
         const [rows] = await db.execute('SELECT * FROM chapters WHERE id = ?', [id]);
         return rows[0]; // Return the chapter if found
     }
+    static async deleteById(id) {
+        await db.execute('DELETE FROM chapters WHERE id = ?', [id]);
+    }
 }
 
 module.exports = Chapter;
