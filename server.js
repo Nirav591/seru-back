@@ -2,19 +2,21 @@ const express = require('express');
 const dotenv = require('dotenv');
 const authRoutes = require('./routes/authRoutes');
 const chapterRoutes = require('./routes/chapterRoutes');
-const questionRoutes = require('./routes/questionRoutes'); // Add this line
-const examTestRoutes = require('./routes/examTestRoutes'); // Add this line
-const examQuestionRoutes = require('./routes/examQuestionRoutes'); // Add this line
+const questionRoutes = require('./routes/questionRoutes');
+const examTestRoutes = require('./routes/examTestRoutes');
+const examQuestionRoutes = require('./routes/examQuestionRoutes');
 
+dotenv.config();
 
-
+const app = express();  // Move this line up to define 'app' before using it
 
 const allowedOrigins = [
-    "http://localhost:3039", // Your frontend local development origin
-    "http://13.40.120.157:6340", // API server origin
+    "http://localhost:3039",
+    "http://13.40.120.157:6340",
     "http://sheru.solidblackabroad.com"
 ];
 
+// CORS middleware should come after defining 'app'
 app.use(
     cors({
         origin: function (origin, callback) {
@@ -24,9 +26,9 @@ app.use(
                 callback(new Error("CORS policy does not allow access from this origin"));
             }
         },
-        methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // Allow HTTP methods
-        allowedHeaders: ["Content-Type", "Authorization", "x-access-key"], // Allow necessary headers
-        credentials: true, // Allow cookies and credentials if required
+        methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        allowedHeaders: ["Content-Type", "Authorization", "x-access-key"],
+        credentials: true,
     })
 );
 
@@ -41,30 +43,22 @@ const checkHeaderString = (req, res, next) => {
     const headerValue = req.headers["x-access-key"];
 
     if (headerValue && headerValue === requiredString) {
-        return next(); // If valid, move to the next middleware or route handler
+        return next();
     }
 
-    // If not valid, send an error response
     return res.status(403).json({ message: "Forbidden: Invalid or missing header string" });
 };
 
 // Apply the custom header check middleware
 app.use(checkHeaderString);
 
-
-
-dotenv.config();
-
-const app = express();
 app.use(express.json());
 
 app.use('/api/auth', authRoutes);
-app.use('/api', chapterRoutes); // Add chapter routes
+app.use('/api', chapterRoutes);
 app.use('/api', questionRoutes);
 app.use('/api', examTestRoutes);
 app.use('/api', examQuestionRoutes);
-
-
 
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
