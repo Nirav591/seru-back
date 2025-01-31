@@ -4,17 +4,17 @@ const { examTestSchema } = require('../validators/examTestValidators');
 // Create a new exam test
 const createExamTest = async (req, res) => {
     try {
-        console.log('Request Body:', req.body); // Log the request body
+        console.log('Request Body:', req.body);
 
         // Validate the request body
         const { error } = examTestSchema.validate(req.body);
         if (error) {
-            console.log('Validation Error:', error.details[0].message); // Log validation error
+            console.log('Validation Error:', error.details[0].message);
             return res.status(400).json({ message: error.details[0].message });
         }
 
         const { title, description, duration } = req.body;
-        console.log('Extracted Data:', { title, description, duration }); // Log extracted data
+        console.log('Extracted Data:', { title, description, duration });
 
         // Create the exam test
         const examTestId = await ExamTest.create({ title, description, duration });
@@ -22,8 +22,8 @@ const createExamTest = async (req, res) => {
 
         res.status(201).json({ message: 'Exam test created successfully', id: examTestId });
     } catch (error) {
-        console.error('Error in createExamTest:', error); // Log the full error
-        res.status(500).json({ message: 'Server error' });
+        console.error('Error in createExamTest:', error);
+        res.status(500).json({ message: 'Server error', error: error.message });  // Detailed error message for debugging
     }
 };
 
