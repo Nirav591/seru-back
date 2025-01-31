@@ -92,7 +92,7 @@ const deleteQuestion = async (req, res) => {
         console.log('Deleting question with ID:', id);
 
         // Check if the question exists
-        const question = await Question.findById(id);
+        const question = await Question.findById(id); // Ensure this method is defined
         if (!question) {
             return res.status(404).json({ message: 'Question not found' });
         }
