@@ -27,6 +27,12 @@ class Question {
         const [rows] = await db.execute('SELECT * FROM questions WHERE chapter_id = ? ORDER BY created_at DESC', [chapter_id]);
         return rows; // Return questions for a specific chapter
     }
+
+    static async findById(id) {
+        const [rows] = await db.execute('SELECT * FROM questions WHERE id = ?', [id]);
+        return rows[0]; // Return the question if found
+    }
+
     static async deleteById(id) {
         await db.execute('DELETE FROM questions WHERE id = ?', [id]);
     }
