@@ -86,4 +86,24 @@ const getQuestionsByChapterId = async (req, res) => {
     }
 };
 
-module.exports = { createQuestion, getAllQuestions, getQuestionsByChapterId };
+const deleteQuestion = async (req, res) => {
+    try {
+        const { id } = req.params;
+        console.log('Deleting question with ID:', id);
+
+        // Check if the question exists
+        const question = await Question.findById(id);
+        if (!question) {
+            return res.status(404).json({ message: 'Question not found' });
+        }
+
+        // Delete the question
+        await Question.deleteById(id);
+        res.status(200).json({ message: 'Question deleted successfully' });
+    } catch (error) {
+        console.error('Error in deleteQuestion:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+module.exports = { createQuestion, getAllQuestions, getQuestionsByChapterId, deleteQuestion };
