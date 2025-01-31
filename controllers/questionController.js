@@ -1,3 +1,4 @@
+const Chapter = require('../models/chapterModel');
 const { Question, Option } = require('../models/questionModel');
 const { questionSchema } = require('../validators/questionValidators');
 
