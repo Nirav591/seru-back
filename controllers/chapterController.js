@@ -56,19 +56,22 @@ const deleteChapter = async (req, res) => {
 };
 
 
-const getChapter = async (req, res) => {
+const getChapterById = async (req, res) => {
     try {
-        const chapter = await Chapter.findById(req.params.id);
+        const { id } = req.params;
+        console.log('Fetching chapter with ID:', id);
 
+        const chapter = await Chapter.findById(id);
         if (!chapter) {
             return res.status(404).json({ message: 'Chapter not found' });
         }
 
+        res.status(200).json({ chapter });
     } catch (error) {
-        console.error('Error fetching chapter:', error);
+        console.error('Error in getChapterById:', error);
         res.status(500).json({ message: 'Server error' });
     }
-}
+};
 
 
-module.exports = { createChapter, getAllChapters, deleteChapter , getChapter };
+module.exports = { createChapter, getAllChapters, deleteChapter , getChapterById };
