@@ -2,6 +2,7 @@ const Chapter = require('../models/chapterModel');
 const { Question } = require('../models/questionModel');
 const { Option } = require('../models/optionModel');
 const { questionSchema } = require('../validators/questionValidators');
+const db = require('../config/db');
 
 const createQuestion = async (req, res) => {
     try {
