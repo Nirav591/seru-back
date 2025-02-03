@@ -54,6 +54,7 @@ class Question {
     static async deleteById(id) {
         await db.execute('DELETE FROM questions WHERE id = ?', [id]);
     }
+
     // Update question
     static async updateById(id, updatedData) {
         const { question, type, noOfAnswer } = updatedData;
@@ -69,8 +70,6 @@ class Question {
     }
 }
 
-
-
 class Option {
     static async create(option) {
         const { question_id, option: text, isAnswer } = option;
@@ -80,9 +79,10 @@ class Option {
         );
     }
 
-    // Add this method to delete options by question ID
+    // Delete options by question ID
     static async deleteByQuestionId(question_id) {
         await db.execute('DELETE FROM options WHERE question_id = ?', [question_id]);
     }
 }
+
 module.exports = { Question, Option };

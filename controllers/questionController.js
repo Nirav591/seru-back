@@ -25,6 +25,7 @@ const createQuestion = async (req, res) => {
 
         // Check if the question already exists for this chapter
         const existingQuestion = await Question.findByChapterAndQuestion(chapter_id, question);
+
         if (existingQuestion) {
             console.log('Question already exists:', existingQuestion); // Log existing question
             return res.status(400).json({ message: 'Question already exists for this chapter' });
@@ -140,6 +141,5 @@ const editQuestion = async (req, res) => {
         res.status(500).json({ message: 'Server error' });
     }
 };
-
 
 module.exports = { createQuestion, getAllQuestions, getQuestionsByChapterId, deleteQuestion, editQuestion };
