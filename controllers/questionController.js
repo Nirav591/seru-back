@@ -126,7 +126,8 @@ const editQuestion = async (req, res) => {
         console.log('Question updated successfully');
 
         // Delete existing options and add updated ones
-        await Option.deleteByQuestionId(id);
+        console.log('Deleting existing options...');
+        await Option.deleteByQuestionId(id); // This should now work
         for (const option of options) {
             console.log('Inserting option:', option);
             await Option.create({ question_id: id, ...option });
