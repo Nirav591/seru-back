@@ -1,21 +1,13 @@
 const db = require('../config/db');
 
 class Question {
-   static async create(question) {
+    static async create(question) {
         const { chapter_id, question: text, type, noOfAnswer } = question;
         const [result] = await db.execute(
             'INSERT INTO questions (chapter_id, question, type, noOfAnswer) VALUES (?, ?, ?, ?)',
             [chapter_id, text, type, noOfAnswer]
         );
         return result.insertId; // Return the ID of the newly created question
-    }
-
-    static async update(id, question) {
-        const { chapter_id, question: text, type, noOfAnswer } = question;
-        await db.execute(
-            'UPDATE questions SET chapter_id = ?, question = ?, type = ?, noOfAnswer = ? WHERE id = ?',
-            [chapter_id, text, type, noOfAnswer, id]
-        );
     }
 
     static async findByChapterAndQuestion(chapter_id, question) {
@@ -67,4 +59,14 @@ class Question {
 module.exports = Question;
 
 
+class Option {
+    static async create(option) {
+        const { question_id, option: text, isAnswer } = option;
+        await db.execute(
+            'INSERT INTO options (question_id, `option`, isAnswer) VALUES (?, ?, ?)',
+            [question_id, text, isAnswer]
+        );
+    }
+}
 
+module.exports = { Question, Option };
