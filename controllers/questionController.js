@@ -98,45 +98,38 @@ const deleteQuestion = async (req, res) => {
 
 const editQuestion = async (req, res) => {
     try {
-        const { id } = req.params;
-        const { chapter_id, question, type, noOfAnswer, options } = req.body;
+        const { chapter_id, question_id, newContent } = req.body;
 
-        console.log('Request Body:', req.body);
-
-        const { error } = questionSchema.validate(req.body);
-        if (error) {
-            console.log('Validation Error:', error.details[0].message);
-            return res.status(400).json({ message: error.details[0].message });
+        if (!chapter_id || !question_id || !newContent) {
+            return res.status(400).json({ message: 'Required fields are missing' });
         }
 
+        // Log the chapter_id for debugging
+        console.log('Received chapter_id:', chapter_id);
+
+        // Find the chapter by ID
         const chapter = await Chapter.findById(chapter_id);
+        
         if (!chapter) {
-            console.log('Chapter not found with ID:', chapter_id);
-            return res.status(404).json({ message: 'Chapter not found' });
+            return res.status(404).json({ message: 'Chapter not found with this ID' });
         }
 
-        const existingQuestion = await Question.findById(id);
-        if (!existingQuestion) {
-            console.log('Question not found with ID:', id);
-            return res.status(404).json({ message: 'Question not found' });
+        // Proceed with updating the question (your logic here)
+
+        // Example SQL update for a question (adjust this as per your logic)
+        const [updateResult] = await db.execute(
+            'UPDATE questions SET content = ? WHERE id = ?',
+            [newContent, question_id]
+        );
+
+        if (updateResult.affectedRows === 0) {
+            return res.status(404).json({ message: 'Question not found with this ID' });
         }
 
-        await Question.update(id, { chapter_id, question, type, noOfAnswer });
-        console.log('Updating question...');
-
-        await Option.deleteByQuestionId(id);
-        console.log('Deleting existing options...');
-
-        for (const option of options) {
-            console.log('Inserting option:', option);
-            await Option.create({ question_id: id, ...option });
-        }
-
-        console.log('Question and options updated successfully');
         res.status(200).json({ message: 'Question updated successfully' });
     } catch (error) {
-        console.error('Error in editQuestion:', error);
-        res.status(500).json({ message: 'Server error' });
+        console.error('Error in editQuestion:', error);  // Log the error
+        res.status(500).json({ message: 'Internal server error' });
     }
 };
 
