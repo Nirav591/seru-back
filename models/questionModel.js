@@ -18,14 +18,32 @@ class Question {
         return rows[0]; // Return the first matching question
     }
 
+    static async findByChapterId(chapter_id) {
+        const [questions] = await db.execute(
+            'SELECT * FROM questions WHERE chapter_id = ?',
+            [chapter_id]
+        );
+
+        // Fetch options for each question
+        const questionsWithOptions = await Promise.all(
+            questions.map(async (question) => {
+                const [options] = await db.execute(
+                    'SELECT * FROM options WHERE question_id = ?',
+                    [question.id]
+                );
+                return {
+                    ...question,
+                    options,
+                };
+            })
+        );
+
+        return questionsWithOptions;
+    }
+
     static async findAll() {
         const [rows] = await db.execute('SELECT * FROM questions ORDER BY created_at DESC');
         return rows; // Return all questions
-    }
-
-    static async findByChapterId(chapter_id) {
-        const [rows] = await db.execute('SELECT * FROM questions WHERE chapter_id = ? ORDER BY created_at DESC', [chapter_id]);
-        return rows; // Return questions for a specific chapter
     }
 
     static async findById(id) {
@@ -37,6 +55,8 @@ class Question {
         await db.execute('DELETE FROM questions WHERE id = ?', [id]);
     }
 }
+
+module.exports = Question;
 
 
 class Option {

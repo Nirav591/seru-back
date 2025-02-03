@@ -74,6 +74,7 @@ const getQuestionsByChapterId = async (req, res) => {
             return res.status(404).json({ message: 'Chapter not found' });
         }
 
+        // Fetch questions with options for the given chapter_id
         const questions = await Question.findByChapterId(chapter_id);
         if (questions.length === 0) {
             return res.status(404).json({ message: 'No questions found for this chapter' });
