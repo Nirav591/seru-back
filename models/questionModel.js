@@ -79,7 +79,7 @@ class Option {
     static async update(id, option) {
         const { question_id, option: text, isAnswer } = option;
         await db.execute(
-            'UPDATE options SET question_id = ?, option = ?, isAnswer = ? WHERE id = ?',
+            'UPDATE options SET question_id = ?, `option` = ?, isAnswer = ? WHERE id = ?', // Wrap `option` in backticks
             [question_id, text, isAnswer, id]
         );
     }
