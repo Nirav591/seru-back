@@ -1,4 +1,4 @@
-const db = require('../config/db');  // Ensure the db connection is correctly configured
+const db = require('../config/db');
 
 class Chapter {
     // Create a new chapter
@@ -12,7 +12,7 @@ class Chapter {
             return result;
         } catch (error) {
             console.error('Error inserting chapter:', error);
-            throw error;  // Rethrow the error
+            throw error;
         }
     }
 
@@ -20,10 +20,10 @@ class Chapter {
     static async findByContent(content) {
         try {
             const [rows] = await db.execute('SELECT * FROM chapters WHERE content = ?', [content]);
-            return rows[0];  // Return the first matching chapter
+            return rows[0];  
         } catch (error) {
             console.error('Error fetching chapter by content:', error);
-            throw error;  // Rethrow the error
+            throw error;
         }
     }
 
@@ -34,19 +34,33 @@ class Chapter {
             return rows;
         } catch (error) {
             console.error('Error fetching all chapters:', error);
-            throw error;  // Rethrow the error
+            throw error;
         }
     }
 
     // Find a chapter by ID
     static async findById(id) {
         try {
-            console.log('Executing SQL query: SELECT * FROM chapters WHERE id = ?', [id]);  // Log the query for debugging
             const [rows] = await db.execute('SELECT * FROM chapters WHERE id = ?', [id]);
-            return rows[0];  // Return the chapter if found
+            return rows[0];
         } catch (error) {
             console.error('Error fetching chapter by ID:', error);
-            throw error;  // Rethrow the error
+            throw error;
+        }
+    }
+
+    // Update chapter by ID
+    static async updateById(id, chapter) {
+        const { title, index_number, content } = chapter;
+        try {
+            const [result] = await db.execute(
+                'UPDATE chapters SET title = ?, index_number = ?, content = ? WHERE id = ?',
+                [title, index_number, content, id]
+            );
+            return result;
+        } catch (error) {
+            console.error('Error updating chapter:', error);
+            throw error;
         }
     }
 
@@ -56,7 +70,7 @@ class Chapter {
             await db.execute('DELETE FROM chapters WHERE id = ?', [id]);
         } catch (error) {
             console.error('Error deleting chapter by ID:', error);
-            throw error;  // Rethrow the error
+            throw error;
         }
     }
 }
