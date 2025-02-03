@@ -4,48 +4,41 @@ const { questionSchema } = require('../validators/questionValidators');
 
 const createQuestion = async (req, res) => {
     try {
-        console.log('Request Body:', req.body); // Log the request body
+        console.log('Request Body:', req.body);
 
-        // Validate the request body
         const { error } = questionSchema.validate(req.body);
         if (error) {
-            console.log('Validation Error:', error.details[0].message); // Log validation error
+            console.log('Validation Error:', error.details[0].message);
             return res.status(400).json({ message: error.details[0].message });
         }
 
         const { chapter_id, question, type, noOfAnswer, options } = req.body;
-        console.log('Extracted Data:', { chapter_id, question, type, noOfAnswer, options }); // Log extracted data
+        console.log('Extracted Data:', { chapter_id, question, type, noOfAnswer, options });
 
-        // Check if the chapter exists
         const chapter = await Chapter.findById(chapter_id);
         if (!chapter) {
-            console.log('Chapter not found with ID:', chapter_id); // Log chapter not found
+            console.log('Chapter not found with ID:', chapter_id);
             return res.status(404).json({ message: 'Chapter not found' });
         }
 
-        // Check if the question already exists for this chapter
         const existingQuestion = await Question.findByChapterAndQuestion(chapter_id, question);
         if (existingQuestion) {
-            console.log('Question already exists:', existingQuestion); // Log existing question
+            console.log('Question already exists:', existingQuestion);
             return res.status(400).json({ message: 'Question already exists for this chapter' });
         }
 
-        // Create the question
-        console.log('Creating question...');
         const questionId = await Question.create({ chapter_id, question, type, noOfAnswer });
         console.log('Question created with ID:', questionId);
 
-        // Create the options
-        console.log('Creating options...');
         for (const option of options) {
-            console.log('Inserting option:', option); // Log each option
+            console.log('Inserting option:', option);
             await Option.create({ question_id: questionId, ...option });
         }
 
         console.log('Question and options created successfully');
         res.status(201).json({ message: 'Question created successfully' });
     } catch (error) {
-        console.error('Error in createQuestion:', error); // Log the full error
+        console.error('Error in createQuestion:', error);
         res.status(500).json({ message: 'Server error' });
     }
 };
@@ -61,20 +54,17 @@ const getAllQuestions = async (req, res) => {
     }
 };
 
-// Get questions by chapter ID
 const getQuestionsByChapterId = async (req, res) => {
     try {
         const { chapter_id } = req.params;
         console.log('Fetching questions for chapter ID:', chapter_id);
 
-        // Check if the chapter exists
         const chapter = await Chapter.findById(chapter_id);
         if (!chapter) {
-            console.log('Chapter not found with ID:', chapter_id); // Log chapter not found
+            console.log('Chapter not found with ID:', chapter_id);
             return res.status(404).json({ message: 'Chapter not found' });
         }
 
-        // Fetch questions with options for the given chapter_id
         const questions = await Question.findByChapterId(chapter_id);
         if (questions.length === 0) {
             return res.status(404).json({ message: 'No questions found for this chapter' });
@@ -92,13 +82,11 @@ const deleteQuestion = async (req, res) => {
         const { id } = req.params;
         console.log('Deleting question with ID:', id);
 
-        // Check if the question exists
-        const question = await Question.findById(id); // Ensure this method is defined
+        const question = await Question.findById(id);
         if (!question) {
             return res.status(404).json({ message: 'Question not found' });
         }
 
-        // Delete the question
         await Question.deleteById(id);
         res.status(200).json({ message: 'Question deleted successfully' });
     } catch (error) {
@@ -112,48 +100,41 @@ const editQuestion = async (req, res) => {
         const { id } = req.params;
         const { chapter_id, question, type, noOfAnswer, options } = req.body;
 
-        console.log('Request Body:', req.body); // Log the request body
+        console.log('Request Body:', req.body);
 
-        // Validate the request body
         const { error } = questionSchema.validate(req.body);
         if (error) {
-            console.log('Validation Error:', error.details[0].message); // Log validation error
+            console.log('Validation Error:', error.details[0].message);
             return res.status(400).json({ message: error.details[0].message });
         }
 
-        // Check if the chapter exists
         const chapter = await Chapter.findById(chapter_id);
         if (!chapter) {
-            console.log('Chapter not found with ID:', chapter_id); // Log chapter not found
+            console.log('Chapter not found with ID:', chapter_id);
             return res.status(404).json({ message: 'Chapter not found' });
         }
 
-        // Check if the question exists
         const existingQuestion = await Question.findById(id);
         if (!existingQuestion) {
-            console.log('Question not found with ID:', id); // Log question not found
+            console.log('Question not found with ID:', id);
             return res.status(404).json({ message: 'Question not found' });
         }
 
-        // Update the question
-        console.log('Updating question...');
         await Question.update(id, { chapter_id, question, type, noOfAnswer });
+        console.log('Updating question...');
 
-        // Delete existing options for the question
-        console.log('Deleting existing options...');
         await Option.deleteByQuestionId(id);
+        console.log('Deleting existing options...');
 
-        // Create new options
-        console.log('Creating new options...');
         for (const option of options) {
-            console.log('Inserting option:', option); // Log each option
+            console.log('Inserting option:', option);
             await Option.create({ question_id: id, ...option });
         }
 
         console.log('Question and options updated successfully');
         res.status(200).json({ message: 'Question updated successfully' });
     } catch (error) {
-        console.error('Error in editQuestion:', error); // Log the full error
+        console.error('Error in editQuestion:', error);
         res.status(500).json({ message: 'Server error' });
     }
 };
