@@ -1,5 +1,6 @@
 const Chapter = require('../models/chapterModel');
-const { Question, Option } = require('../models/questionModel');
+const { Question } = require('../models/questionModel');
+const { Option } = require('../models/optionModel');
 const { questionSchema } = require('../validators/questionValidators');
 
 const createQuestion = async (req, res) => {

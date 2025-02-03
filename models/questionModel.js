@@ -1,7 +1,7 @@
 const db = require('../config/db');
 
 class Question {
-    static async create(question) {
+   static async create(question) {
         const { chapter_id, question: text, type, noOfAnswer } = question;
         const [result] = await db.execute(
             'INSERT INTO questions (chapter_id, question, type, noOfAnswer) VALUES (?, ?, ?, ?)',
@@ -67,30 +67,5 @@ class Question {
 module.exports = Question;
 
 
-class Option {
-    static async create(option) {
-        const { question_id, option: text, isAnswer } = option;
-        await db.execute(
-            'INSERT INTO options (question_id, option, isAnswer) VALUES (?, ?, ?)',
-            [question_id, text, isAnswer]
-        );
-    }
-
-    static async update(id, option) {
-        const { question_id, option: text, isAnswer } = option;
-        await db.execute(
-            'INSERT INTO options (question_id, `option`, isAnswer) VALUES (?, ?, ?)',
-            [question_id, text, isAnswer]
-        ).then(() => {
-            console.log('Option successfully inserted');
-        }).catch(error => {
-            console.error('SQL Error:', error); // Log the error to catch any issues
-        });
-    }
-
-    static async deleteByQuestionId(question_id) {
-        await db.execute('DELETE FROM options WHERE question_id = ?', [question_id]);
-    }
-}
 
 module.exports = { Question, Option };
