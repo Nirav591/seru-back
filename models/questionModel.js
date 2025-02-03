@@ -10,6 +10,14 @@ class Question {
         return result.insertId; // Return the ID of the newly created question
     }
 
+    static async update(id, question) {
+        const { chapter_id, question: text, type, noOfAnswer } = question;
+        await db.execute(
+            'UPDATE questions SET chapter_id = ?, question = ?, type = ?, noOfAnswer = ? WHERE id = ?',
+            [chapter_id, text, type, noOfAnswer, id]
+        );
+    }
+
     static async findByChapterAndQuestion(chapter_id, question) {
         const [rows] = await db.execute(
             'SELECT * FROM questions WHERE chapter_id = ? AND question = ?',
@@ -63,9 +71,21 @@ class Option {
     static async create(option) {
         const { question_id, option: text, isAnswer } = option;
         await db.execute(
-            'INSERT INTO options (question_id, `option`, isAnswer) VALUES (?, ?, ?)',
+            'INSERT INTO options (question_id, option, isAnswer) VALUES (?, ?, ?)',
             [question_id, text, isAnswer]
         );
+    }
+
+    static async update(id, option) {
+        const { question_id, option: text, isAnswer } = option;
+        await db.execute(
+            'UPDATE options SET question_id = ?, option = ?, isAnswer = ? WHERE id = ?',
+            [question_id, text, isAnswer, id]
+        );
+    }
+
+    static async deleteByQuestionId(question_id) {
+        await db.execute('DELETE FROM options WHERE question_id = ?', [question_id]);
     }
 }
 

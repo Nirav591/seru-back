@@ -107,4 +107,55 @@ const deleteQuestion = async (req, res) => {
     }
 };
 
-module.exports = { createQuestion, getAllQuestions, getQuestionsByChapterId, deleteQuestion };
+const editQuestion = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { chapter_id, question, type, noOfAnswer, options } = req.body;
+
+        console.log('Request Body:', req.body); // Log the request body
+
+        // Validate the request body
+        const { error } = questionSchema.validate(req.body);
+        if (error) {
+            console.log('Validation Error:', error.details[0].message); // Log validation error
+            return res.status(400).json({ message: error.details[0].message });
+        }
+
+        // Check if the chapter exists
+        const chapter = await Chapter.findById(chapter_id);
+        if (!chapter) {
+            console.log('Chapter not found with ID:', chapter_id); // Log chapter not found
+            return res.status(404).json({ message: 'Chapter not found' });
+        }
+
+        // Check if the question exists
+        const existingQuestion = await Question.findById(id);
+        if (!existingQuestion) {
+            console.log('Question not found with ID:', id); // Log question not found
+            return res.status(404).json({ message: 'Question not found' });
+        }
+
+        // Update the question
+        console.log('Updating question...');
+        await Question.update(id, { chapter_id, question, type, noOfAnswer });
+
+        // Delete existing options for the question
+        console.log('Deleting existing options...');
+        await Option.deleteByQuestionId(id);
+
+        // Create new options
+        console.log('Creating new options...');
+        for (const option of options) {
+            console.log('Inserting option:', option); // Log each option
+            await Option.create({ question_id: id, ...option });
+        }
+
+        console.log('Question and options updated successfully');
+        res.status(200).json({ message: 'Question updated successfully' });
+    } catch (error) {
+        console.error('Error in editQuestion:', error); // Log the full error
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+module.exports = { createQuestion, getAllQuestions, getQuestionsByChapterId, deleteQuestion, editQuestion };
