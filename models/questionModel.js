@@ -54,6 +54,19 @@ class Question {
     static async deleteById(id) {
         await db.execute('DELETE FROM questions WHERE id = ?', [id]);
     }
+    // Update question
+    static async updateById(id, updatedData) {
+        const { question, type, noOfAnswer } = updatedData;
+        await db.execute(
+            'UPDATE questions SET question = ?, type = ?, noOfAnswer = ? WHERE id = ?',
+            [question, type, noOfAnswer, id]
+        );
+    }
+
+    // Delete options by question ID (to replace with new ones)
+    static async deleteByQuestionId(question_id) {
+        await db.execute('DELETE FROM options WHERE question_id = ?', [question_id]);
+    }
 }
 
 module.exports = Question;

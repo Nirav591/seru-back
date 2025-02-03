@@ -107,5 +107,38 @@ const deleteQuestion = async (req, res) => {
     }
 };
 
+const editQuestion = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { question, type, noOfAnswer, options } = req.body;
+        console.log('Editing question with ID:', id);
 
-module.exports = { createQuestion, getAllQuestions, getQuestionsByChapterId, deleteQuestion };
+        // Check if the question exists
+        const existingQuestion = await Question.findById(id);
+        if (!existingQuestion) {
+            console.log('Question not found with ID:', id);
+            return res.status(404).json({ message: 'Question not found' });
+        }
+
+        // Update the question
+        console.log('Updating question...');
+        await Question.updateById(id, { question, type, noOfAnswer });
+        console.log('Question updated successfully');
+
+        // Delete existing options and add updated ones
+        await Option.deleteByQuestionId(id);
+        for (const option of options) {
+            console.log('Inserting option:', option);
+            await Option.create({ question_id: id, ...option });
+        }
+
+        console.log('Options updated successfully');
+        res.status(200).json({ message: 'Question and options updated successfully' });
+    } catch (error) {
+        console.error('Error in editQuestion:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+
+module.exports = { createQuestion, getAllQuestions, getQuestionsByChapterId, deleteQuestion, editQuestion };
