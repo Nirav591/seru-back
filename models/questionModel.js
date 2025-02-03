@@ -68,4 +68,3 @@ module.exports = Question;
 
 
 
-module.exports = { Question, Option };
