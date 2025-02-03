@@ -69,7 +69,6 @@ class Question {
     }
 }
 
-module.exports = Question;
 
 
 class Option {
@@ -80,6 +79,10 @@ class Option {
             [question_id, text, isAnswer]
         );
     }
-}
 
+    // Add this method to delete options by question ID
+    static async deleteByQuestionId(question_id) {
+        await db.execute('DELETE FROM options WHERE question_id = ?', [question_id]);
+    }
+}
 module.exports = { Question, Option };
