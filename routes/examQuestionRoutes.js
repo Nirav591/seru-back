@@ -1,5 +1,5 @@
 const express = require('express');
-const { createExamQuestion , getExamQuestionsByExamTestId} = require('../controllers/examQuestionController');
+const { createExamQuestion , getExamQuestionsByExamTestId, getQuestionsByExamTestId} = require('../controllers/examQuestionController');
 
 const router = express.Router();
 
