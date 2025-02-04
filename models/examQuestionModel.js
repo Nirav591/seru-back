@@ -11,8 +11,26 @@ class ExamQuestion {
     }
 
     static async findByExamTestId(exam_test_id) {
-        const [rows] = await db.execute('SELECT * FROM exam_questions WHERE exam_test_id = ?', [exam_test_id]);
-        return rows; // Return all questions for the exam test
+        const [questions] = await db.execute(
+            'SELECT * FROM exam_questions WHERE exam_test_id = ?',
+            [exam_test_id]
+        );
+
+        // Fetch options for each question
+        const questionsWithOptions = await Promise.all(
+            questions.map(async (question) => {
+                const [options] = await db.execute(
+                    'SELECT * FROM exam_options WHERE exam_question_id = ?',
+                    [question.id]
+                );
+                return {
+                    ...question,
+                    options,
+                };
+            })
+        );
+
+        return questionsWithOptions;
     }
 
     static async findByExamTestAndQuestion(exam_test_id, question) {
@@ -22,7 +40,7 @@ class ExamQuestion {
         );
         return rows[0]; // Return the first matching question
     }
-    
+
 
 }
 

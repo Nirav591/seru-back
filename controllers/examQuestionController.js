@@ -60,5 +60,22 @@ const getExamQuestionsByExamTestId = async (req, res) => {
     }
 };
 
+const getQuestionsByExamTestId = async (req, res) => {
+    try {
+        const { exam_test_id } = req.params;
+        console.log('Fetching questions for exam test ID:', exam_test_id);
 
-module.exports = { createExamQuestion , getExamQuestionsByExamTestId};
+        // Fetch questions with options for the given exam_test_id
+        const questions = await ExamQuestion.findByExamTestId(exam_test_id);
+        if (questions.length === 0) {
+            return res.status(404).json({ message: 'No questions found for this exam test' });
+        }
+
+        res.status(200).json({ questions });
+    } catch (error) {
+        console.error('Error in getQuestionsByExamTestId:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+module.exports = { createExamQuestion, getExamQuestionsByExamTestId, getQuestionsByExamTestId };
