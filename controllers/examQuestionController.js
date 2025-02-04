@@ -53,11 +53,6 @@ const getExamQuestionsByExamTestId = async (req, res) => {
             return res.status(404).json({ message: 'No questions found for this exam test' });
         }
 
-        // Fetch options for each question
-        for (let question of questions) {
-            question.options = await ExamQuestion.getOptionsByQuestionId(question.id);
-        }
-
         res.status(200).json({ questions });
     } catch (error) {
         console.error('Error in getExamQuestionsByExamTestId:', error);
