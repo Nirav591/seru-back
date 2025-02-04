@@ -41,6 +41,20 @@ class ExamQuestion {
         return rows[0]; // Return the first matching question
     }
 
+    static async deleteById(exam_question_id) {
+        try {
+            // Delete options first (if they exist)
+            await db.execute('DELETE FROM exam_options WHERE exam_question_id = ?', [exam_question_id]);
+    
+            // Delete the question
+            const [result] = await db.execute('DELETE FROM exam_questions WHERE id = ?', [exam_question_id]);
+    
+            return result.affectedRows > 0; // Return true if deleted, false if not found
+        } catch (error) {
+            throw error;
+        }
+    }
+    
 
 }
 

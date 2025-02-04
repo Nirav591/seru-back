@@ -78,4 +78,20 @@ const getQuestionsByExamTestId = async (req, res) => {
     }
 };
 
-module.exports = { createExamQuestion, getExamQuestionsByExamTestId, getQuestionsByExamTestId };
+const deleteExamQuestion = async (req, res) => {
+    try {
+        const { exam_question_id } = req.params;
+
+        const deleted = await ExamQuestion.deleteById(exam_question_id);
+        if (!deleted) {
+            return res.status(404).json({ message: 'Exam question not found' });
+        }
+
+        res.status(200).json({ message: 'Exam question deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting exam question:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+module.exports = { createExamQuestion, getExamQuestionsByExamTestId, getQuestionsByExamTestId, deleteExamQuestion };
