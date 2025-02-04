@@ -22,7 +22,13 @@ class ExamQuestion {
         );
         return rows[0]; // Return the first matching question
     }
-    
+    static async getOptionsByQuestionId(question_id) {
+        const [rows] = await db.execute(
+            'SELECT id, question_id, option_text, isAnswer FROM question_options WHERE question_id = ?',
+            [question_id]
+        );
+        return rows;
+    }
 
 }
 
