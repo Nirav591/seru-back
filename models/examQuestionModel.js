@@ -47,7 +47,7 @@ class ExamQuestion {
 
     static async getOptionsByQuestionId(question_id) {
         const [rows] = await db.execute(
-            'SELECT id, question_id, option, isAnswer FROM question_options WHERE question_id = ?',
+            'SELECT id, question_id, `option`, isAnswer FROM question_options WHERE question_id = ?',
             [question_id]
         );
         return rows; // Return all options for the question
