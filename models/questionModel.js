@@ -68,6 +68,14 @@ class Question {
     static async deleteByQuestionId(question_id) {
         await db.execute('DELETE FROM options WHERE question_id = ?', [question_id]);
     }
+
+    static async countByChapterId(chapter_id) {
+        const [rows] = await db.execute(
+            'SELECT COUNT(*) AS question_count FROM questions WHERE chapter_id = ?',
+            [chapter_id]
+        );
+        return rows[0].question_count; // Return the count of questions
+    }
 }
 
 class Option {

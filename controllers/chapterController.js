@@ -27,12 +27,25 @@ const createChapter = async (req, res) => {
 const getAllChapters = async (req, res) => {
     try {
         const chapters = await Chapter.findAll();
-        res.status(200).json({ chapters });
+
+        // Add question count to each chapter
+        const chaptersWithQuestionCount = await Promise.all(
+            chapters.map(async (chapter) => {
+                const questionCount = await Question.countByChapterId(chapter.id);
+                return {
+                    ...chapter,
+                    questionCount,
+                };
+            })
+        );
+
+        res.status(200).json({ chapters: chaptersWithQuestionCount });
     } catch (error) {
         console.error('Error in getAllChapters:', error);
         res.status(500).json({ message: 'Server error' });
     }
 };
+
 
 // Get chapter by ID
 const getChapterById = async (req, res) => {
@@ -42,13 +55,20 @@ const getChapterById = async (req, res) => {
         if (!chapter) {
             return res.status(404).json({ message: 'Chapter not found' });
         }
-        res.status(200).json({ chapter });
+
+        // Add question count to the chapter
+        const questionCount = await Question.countByChapterId(id);
+        const chapterWithQuestionCount = {
+            ...chapter,
+            questionCount,
+        };
+
+        res.status(200).json({ chapter: chapterWithQuestionCount });
     } catch (error) {
         console.error('Error in getChapterById:', error);
         res.status(500).json({ message: 'Server error' });
     }
 };
-
 // Edit chapter
 const editChapter = async (req, res) => {
     try {
