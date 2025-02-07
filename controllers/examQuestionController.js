@@ -46,17 +46,25 @@ const createExamQuestion = async (req, res) => {
 const getExamQuestionsByExamTestId = async (req, res) => {
     try {
         const { exam_test_id } = req.params;
-        console.log('Fetching questions for exam test ID:', exam_test_id);
 
-        const questions = await ExamQuestion.findByExamTestId(exam_test_id);
-        if (questions.length === 0) {
-            return res.status(404).json({ message: 'No questions found for this exam test' });
-        }
+        // Fetch all questions for the given exam test
+        const questions = await db.query(
+            "SELECT * FROM exam_questions WHERE exam_test_id = ?",
+            [exam_test_id]
+        );
 
-        res.status(200).json({ questions });
+        // Get the total number of questions
+        const totalQuestions = questions.length;
+
+        res.status(200).json({
+            success: true,
+            totalQuestions,  // Include the count
+            exam_test_id,
+            questions
+        });
     } catch (error) {
-        console.error('Error in getExamQuestionsByExamTestId:', error);
-        res.status(500).json({ message: 'Server error' });
+        console.error("Error fetching questions:", error);
+        res.status(500).json({ success: false, message: "Server Error" });
     }
 };
 
