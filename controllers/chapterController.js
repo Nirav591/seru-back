@@ -1,4 +1,5 @@
 const Chapter = require('../models/chapterModel');
+const { Question } = require('../models/questionModel');
 const { chapterSchema } = require('../validators/chapterValidators');
 
 // Create chapter
