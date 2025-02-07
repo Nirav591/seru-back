@@ -1,6 +1,7 @@
 const ExamQuestion = require('../models/examQuestionModel');
 const ExamOption = require('../models/examOptionModel');
 const { examQuestionSchema } = require('../validators/examQuestionValidators');
+const db = require('../config/db');
 
 const createExamQuestion = async (req, res) => {
     try {
