@@ -14,7 +14,7 @@ const app = express();  // Move this line up to define 'app' before using it
 const allowedOrigins = [
     "http://localhost:3039",
     "http://13.40.120.157:6340",
-    "http://sheru.solidblackabroad.com"
+    "https://sheru.solidblackabroad.com"
 ];
 
 // CORS middleware should come after defining 'app'
