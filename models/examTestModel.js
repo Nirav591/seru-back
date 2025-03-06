@@ -7,31 +7,32 @@ class ExamTest {
             'INSERT INTO exam_tests (title, description, duration) VALUES (?, ?, ?)',
             [title, description, duration]
         );
-        return result.insertId; // Return the ID of the newly created exam test
+        return result.insertId;
     }
 
     static async findById(id) {
         const [rows] = await db.execute('SELECT * FROM exam_tests WHERE id = ?', [id]);
-        return rows[0]; // Return the exam test if found
+        return rows[0];
     }
 
     static async findAll() {
         const [rows] = await db.execute('SELECT * FROM exam_tests ORDER BY created_at DESC');
-        return rows; // Return all exam tests
+        return rows;
     }
 
     static async deleteById(id) {
         await db.execute('DELETE FROM exam_tests WHERE id = ?', [id]);
     }
 
-    // ✅ Add this method to count the total questions for a given exam_test
+    // ✅ Add this method
     static async getTotalQuestions(examTestId) {
         const [rows] = await db.execute(
             'SELECT COUNT(*) AS totalQuestions FROM questions WHERE exam_test_id = ?',
             [examTestId]
         );
-        return rows[0]?.totalQuestions || 0; // Return the count, or 0 if no questions exist
+        return rows[0]?.totalQuestions || 0;
     }
 }
 
+// ✅ Make sure you are exporting the class correctly
 module.exports = ExamTest;
