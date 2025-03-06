@@ -94,4 +94,30 @@ const deleteExamTestById = async (req, res) => {
     }
 };
 
-module.exports = { createExamTest, getAllExamTests, getExamTestById, deleteExamTestById };
+const deleteExamTest = async (req, res) => {
+    try {
+        const { exam_test_id } = req.params;
+        console.log(`Deleting exam test with ID: ${exam_test_id}`);
+
+        // Check if the exam test exists
+        const [examTest] = await db.execute("SELECT * FROM exam_tests WHERE id = ?", [exam_test_id]);
+        if (examTest.length === 0) {
+            return res.status(404).json({ message: "Exam test not found" });
+        }
+
+        // Delete all questions associated with this exam test
+        await db.execute("DELETE FROM exam_questions WHERE exam_test_id = ?", [exam_test_id]);
+
+        // Delete the exam test itself
+        await db.execute("DELETE FROM exam_tests WHERE id = ?", [exam_test_id]);
+
+        res.status(200).json({ success: true, message: "Exam test deleted successfully" });
+
+    } catch (error) {
+        console.error("Error in deleteExamTest:", error);
+        res.status(500).json({ success: false, message: "Server error" });
+    }
+};
+
+
+module.exports = { createExamTest, getAllExamTests, getExamTestById, deleteExamTestById, deleteExamTest };

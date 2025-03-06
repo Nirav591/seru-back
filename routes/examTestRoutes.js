@@ -1,5 +1,5 @@
 const express = require('express');
-const { createExamTest, getAllExamTests, getExamTestById, deleteExamTestById } = require('../controllers/examTestController');
+const { createExamTest, getAllExamTests, getExamTestById, deleteExamTestById, deleteExamTest } = require('../controllers/examTestController');
 
 const router = express.Router();
 
@@ -14,5 +14,8 @@ router.get('/exam-tests/:id', getExamTestById);
 
 // DELETE API to delete an exam test by ID
 router.delete('/exam-tests/:id', deleteExamTestById);
+
+router.delete('/exam-tests/:exam_test_id', deleteExamTest);
+
 
 module.exports = router;
