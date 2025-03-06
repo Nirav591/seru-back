@@ -6,41 +6,40 @@ const db = require('../config/db');
 
 const createExamQuestion = async (req, res) => {
     try {
-        console.log('Request Body:', req.body); // Log the request body
-
-        // Validate the request body
-        const { error } = examQuestionSchema.validate(req.body);
-        if (error) {
-            console.log('Validation Error:', error.details[0].message); // Log validation error
-            return res.status(400).json({ message: error.details[0].message });
-        }
+        console.log('Request Body:', req.body);
 
         const { exam_test_id, question, type, noOfAnswer, options } = req.body;
-        console.log('Extracted Data:', { exam_test_id, question, type, noOfAnswer, options }); // Log extracted data
+        console.log('Extracted Data:', { exam_test_id, question, type, noOfAnswer, options });
 
-        // Check if the question already exists for this exam test
+        // ✅ Check if exam_test_id exists
+        const [examTest] = await db.execute("SELECT id FROM exam_tests WHERE id = ?", [exam_test_id]);
+        if (examTest.length === 0) {
+            return res.status(400).json({ message: "Invalid exam_test_id: No such exam test exists." });
+        }
+
+        // ✅ Check if the question already exists for this exam test
         const existingQuestion = await ExamQuestion.findByExamTestAndQuestion(exam_test_id, question);
         if (existingQuestion) {
-            console.log('Question already exists:', existingQuestion); // Log existing question
+            console.log('Question already exists:', existingQuestion);
             return res.status(400).json({ message: 'Question already exists for this exam test' });
         }
 
-        // Create the exam question
+        // ✅ Insert the exam question
         console.log('Creating exam question...');
         const examQuestionId = await ExamQuestion.create({ exam_test_id, question, type, noOfAnswer });
         console.log('Exam question created with ID:', examQuestionId);
 
-        // Create the options
+        // ✅ Insert options
         console.log('Creating options...');
         for (const option of options) {
-            console.log('Inserting option:', option); // Log each option
+            console.log('Inserting option:', option);
             await ExamOption.create({ exam_question_id: examQuestionId, ...option });
         }
 
-        console.log('Exam question and options created successfully');
         res.status(201).json({ message: 'Exam question created successfully' });
+
     } catch (error) {
-        console.error('Error in createExamQuestion:', error); // Log the full error
+        console.error('Error in createExamQuestion:', error);
         res.status(500).json({ message: 'Server error' });
     }
 };
