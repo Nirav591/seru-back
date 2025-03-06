@@ -1,5 +1,6 @@
 const ExamQuestion = require('../models/examQuestionModel');
 const ExamOption = require('../models/examOptionModel');
+const ExamTest = require("../models/examTestModel")
 const { examQuestionSchema } = require('../validators/examQuestionValidators');
 const db = require('../config/db');
 
@@ -122,4 +123,41 @@ const deleteExamQuestion = async (req, res) => {
     }
 };
 
-module.exports = { createExamQuestion, getExamQuestionsByExamTestId, getQuestionsByExamTestId, deleteExamQuestion };
+const getAllExamTests = async (req, res) => {
+    try {
+        console.log('Fetching all exam tests...');
+
+        // Fetch all exam tests from the database
+        const [examTests] = await db.execute("SELECT * FROM exam_tests ORDER BY created_at DESC");
+
+        if (examTests.length === 0) {
+            return res.status(404).json({ message: 'No exam tests found' });
+        }
+
+        // Fetch total number of questions for each exam test
+        const examTestsWithTotalQuestions = await Promise.all(
+            examTests.map(async (examTest) => {
+                const [questionCount] = await db.execute(
+                    "SELECT COUNT(*) AS totalQuestions FROM exam_questions WHERE exam_test_id = ?",
+                    [examTest.id]
+                );
+                return { 
+                    ...examTest, 
+                    totalQuestions: questionCount[0]?.totalQuestions || 0 
+                };
+            })
+        );
+
+        res.status(200).json({
+            success: true,
+            totalTests: examTests.length,
+            examTests: examTestsWithTotalQuestions
+        });
+
+    } catch (error) {
+        console.error('Error in getAllExamTests:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+module.exports = { createExamQuestion, getExamQuestionsByExamTestId, getQuestionsByExamTestId, deleteExamQuestion , getAllExamTests};
