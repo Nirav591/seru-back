@@ -37,7 +37,11 @@ const getAllExamTests = async (req, res) => {
         console.log('Fetching all exam tests...');
         const examTests = await ExamTest.findAll();
 
-        // Include totalQuestions for each exam test
+        if (!examTests || examTests.length === 0) {
+            return res.status(404).json({ message: 'No exam tests found' });
+        }
+
+        // Fetch total questions count for each exam test
         const examTestsWithTotalQuestions = await Promise.all(
             examTests.map(async (examTest) => {
                 const totalQuestions = await ExamTest.getTotalQuestions(examTest.id);
@@ -47,7 +51,7 @@ const getAllExamTests = async (req, res) => {
                     description: examTest.description, 
                     duration: examTest.duration, 
                     created_at: examTest.created_at, 
-                    totalQuestions: totalQuestions || 0 // Ensure totalQuestions is always a number
+                    totalQuestions: totalQuestions || 0 // Ensure a valid number
                 };
             })
         );
