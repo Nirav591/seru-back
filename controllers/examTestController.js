@@ -41,17 +41,17 @@ const getAllExamTests = async (req, res) => {
             return res.status(404).json({ message: 'No exam tests found' });
         }
 
-        // Fetch total questions count for each exam test
         const examTestsWithTotalQuestions = await Promise.all(
             examTests.map(async (examTest) => {
                 const totalQuestions = await ExamTest.getTotalQuestions(examTest.id);
+                console.log(`Exam ID: ${examTest.id}, Total Questions: ${totalQuestions}`); // Debugging log
                 return { 
                     id: examTest.id, 
                     title: examTest.title, 
                     description: examTest.description, 
                     duration: examTest.duration, 
                     created_at: examTest.created_at, 
-                    totalQuestions: totalQuestions || 0 // Ensure a valid number
+                    totalQuestions: totalQuestions // Ensure correct value
                 };
             })
         );
@@ -62,7 +62,6 @@ const getAllExamTests = async (req, res) => {
         res.status(500).json({ message: 'Server error' });
     }
 };
-
 // Get an exam test by ID
 const getExamTestById = async (req, res) => {
     try {

@@ -26,11 +26,17 @@ class ExamTest {
 
     // ✅ Add this method
     static async getTotalQuestions(examTestId) {
-        const [rows] = await db.execute(
-            'SELECT COUNT(*) AS totalQuestions FROM questions WHERE exam_test_id = ?',
-            [examTestId]
-        );
-        return rows[0]?.totalQuestions || 0;
+        try {
+            const [rows] = await db.execute(
+                'SELECT COUNT(*) AS totalQuestions FROM exam_questions WHERE exam_test_id = ?',
+                [examTestId]
+            );
+            console.log(`Total Questions for Exam ID ${examTestId}:`, rows[0]?.totalQuestions);
+            return rows[0]?.totalQuestions || 0; // Return 0 if no questions exist
+        } catch (error) {
+            console.error('Error in getTotalQuestions:', error);
+            return 0;
+        }
     }
 }
 
