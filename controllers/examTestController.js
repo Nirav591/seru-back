@@ -41,7 +41,14 @@ const getAllExamTests = async (req, res) => {
         const examTestsWithTotalQuestions = await Promise.all(
             examTests.map(async (examTest) => {
                 const totalQuestions = await ExamTest.getTotalQuestions(examTest.id);
-                return { ...examTest, totalQuestions };
+                return { 
+                    id: examTest.id, 
+                    title: examTest.title, 
+                    description: examTest.description, 
+                    duration: examTest.duration, 
+                    created_at: examTest.created_at, 
+                    totalQuestions: totalQuestions || 0 // Ensure totalQuestions is always a number
+                };
             })
         );
 
