@@ -15,7 +15,7 @@ const allowedOrigins = [
     "http://localhost:3039",
     "http://13.40.120.157:6340",
     "https://sheru.solidblackabroad.com",
-    "admin.solidblackabroad.com"
+    "https://admin.solidblackabroad.com"
 ];
 
 // CORS middleware should come after defining 'app'
