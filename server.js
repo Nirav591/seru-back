@@ -1,24 +1,32 @@
 const express = require('express');
 const dotenv = require('dotenv');
-const cors = require("cors");
+const cors = require('cors');
 const authRoutes = require('./routes/authRoutes');
 const chapterRoutes = require('./routes/chapterRoutes');
 const questionRoutes = require('./routes/questionRoutes');
 const examTestRoutes = require('./routes/examTestRoutes');
 const examQuestionRoutes = require('./routes/examQuestionRoutes');
+const https = require('https');
+const fs = require('fs');
+const path = require('path');
 
 dotenv.config();
 
-const app = express();  // Move this line up to define 'app' before using it
+const app = express();
+
+// Load SSL Certificates
+const privateKey = fs.readFileSync(path.resolve(__dirname, 'ssl/private.key'), 'utf8');
+const certificate = fs.readFileSync(path.resolve(__dirname, 'ssl/server.crt'), 'utf8');
+const credentials = { key: privateKey, cert: certificate };
 
 const allowedOrigins = [
     "http://localhost:3039",
-    "http://13.40.120.157:6340",
+    "https://13.40.120.157:6340",
     "https://sheru.solidblackabroad.com",
     "https://admin.solidblackabroad.com"
 ];
 
-// CORS middleware should come after defining 'app'
+// CORS middleware
 app.use(
     cors({
         origin: function (origin, callback) {
@@ -41,7 +49,6 @@ app.options("*", cors());
 const checkHeaderString = (req, res, next) => {
     const requiredString = "your-secret-string"; // Replace with your required string
 
-    // Check if the required string is in the header
     const headerValue = req.headers["x-access-key"];
 
     if (headerValue && headerValue === requiredString) {
@@ -51,7 +58,6 @@ const checkHeaderString = (req, res, next) => {
     return res.status(403).json({ message: "Forbidden: Invalid or missing header string" });
 };
 
-// Apply the custom header check middleware
 app.use(checkHeaderString);
 
 app.use(express.json());
@@ -62,7 +68,10 @@ app.use('/api', questionRoutes);
 app.use('/api', examTestRoutes);
 app.use('/api', examQuestionRoutes);
 
+// Create HTTPS Server
+const server = https.createServer(credentials, app);
+
 const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+server.listen(PORT, () => {
+    console.log(`HTTPS Server running on port ${PORT}`);
 });
