@@ -41,7 +41,7 @@ app.options("*", cors());
 
 // Middleware to check x-access-key header
 const checkHeaderString = (req, res, next) => {
-    const requiredString = "seru-wimbledon";
+    const requiredString = "your-secret-string";
     const headerValue = req.headers["x-access-key"];
 
     if (headerValue === requiredString) {
