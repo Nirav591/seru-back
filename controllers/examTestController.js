@@ -1,190 +1,133 @@
-const ExamQuestion = require('../models/examQuestionModel');
-const ExamOption = require('../models/examOptionModel');
-const ExamTest = require("../models/examTestModel");
-const { examQuestionSchema } = require('../validators/examQuestionValidators');
-const db = require('../config/db');
+const ExamTest = require('../models/examTestModel');
+const { examTestSchema } = require('../validators/examTestValidators');
 
-const createExamQuestion = async (req, res) => {
+// Create a new exam test
+const createExamTest = async (req, res) => {
     try {
-        console.log('Request Body:', req.body);
+        console.log('Request Body:', req.body); // Log the request body
 
-        const { exam_test_id, question, type, noOfAnswer, options } = req.body;
-        console.log('Extracted Data:', { exam_test_id, question, type, noOfAnswer, options });
-
-        // ✅ Check if exam_test_id exists
-        const [examTest] = await db.execute("SELECT id FROM exam_tests WHERE id = ?", [exam_test_id]);
-        if (examTest.length === 0) {
-            return res.status(400).json({ message: "Invalid exam_test_id: No such exam test exists." });
+        // Validate the request body
+        const { error } = examTestSchema.validate(req.body);
+        if (error) {
+            console.log('Validation Error:', error.details[0].message); // Log validation error
+            return res.status(400).json({ message: error.details[0].message });
         }
 
-        // ✅ Check if the question already exists for this exam test
-        const existingQuestion = await ExamQuestion.findByExamTestAndQuestion(exam_test_id, question);
-        if (existingQuestion) {
-            console.log('Question already exists:', existingQuestion);
-            return res.status(400).json({ message: 'Question already exists for this exam test' });
-        }
+        const { title, description, duration } = req.body;
+        console.log('Extracted Data:', { title, description, duration }); // Log extracted data
 
-        // ✅ Extra Validation for FILL_BLANK
-        if (type === 'fill_in_blank') {
-            const placeholderMatches = question.match(/{{\d+}}/g) || [];
-            const correctOptionsCount = options.filter(opt => opt.isAnswer === true || opt.isAnswer === 'true').length;
+        // Create the exam test
+        const examTestId = await ExamTest.create({ title, description, duration });
+        console.log('Exam test created with ID:', examTestId);
 
-            if (placeholderMatches.length !== noOfAnswer) {
-                return res.status(400).json({ message: "Number of placeholders in question doesn't match 'noOfAnswer'" });
-            }
+        // Calculate totalQuestions for the newly created exam test
+        const totalQuestions = await ExamTest.getTotalQuestions(examTestId);
+        console.log('Total Questions:', totalQuestions);
 
-            if (correctOptionsCount !== noOfAnswer) {
-                return res.status(400).json({ message: "Number of correct options doesn't match 'noOfAnswer'" });
-            }
-        }
-
-        // ✅ Insert the exam question
-        console.log('Creating exam question...');
-        const examQuestionId = await ExamQuestion.create({ exam_test_id, question, type, noOfAnswer });
-        console.log('Exam question created with ID:', examQuestionId);
-
-        // ✅ Insert options
-        console.log('Creating options...');
-        for (const option of options) {
-            console.log('Inserting option:', option);
-            const isAnswer = option.isAnswer === true || option.isAnswer === 'true';
-            await ExamOption.create({
-                exam_question_id: examQuestionId,
-                option: option.option,
-                isAnswer
-            });
-        }
-
-        res.status(201).json({ message: 'Exam question created successfully' });
-
+        res.status(201).json({ message: 'Exam test created successfully', id: examTestId, totalQuestions });
     } catch (error) {
-        console.error('Error in createExamQuestion:', error);
+        console.error('Error in createExamTest:', error); // Log the full error
         res.status(500).json({ message: 'Server error' });
     }
 };
 
-const getExamQuestionsByExamTestId = async (req, res) => {
-    try {
-        const { exam_test_id } = req.params;
-        console.log('Fetching questions for exam test ID:', exam_test_id);
-
-        const [questions] = await db.execute(
-            "SELECT * FROM exam_questions WHERE exam_test_id = ?",
-            [exam_test_id]
-        );
-
-        if (questions.length === 0) {
-            return res.status(404).json({ message: 'No questions found for this exam test' });
-        }
-
-        const questionsWithOptions = await Promise.all(
-            questions.map(async (question) => {
-                const [options] = await db.execute(
-                    "SELECT * FROM exam_options WHERE exam_question_id = ?",
-                    [question.id]
-                );
-
-                const formattedOptions = options.map(opt => ({
-                    id: opt.id,
-                    option: opt.option,
-                    isAnswer: !!opt.isAnswer
-                }));
-
-                return {
-                    id: question.id,
-                    question: question.question,
-                    type: question.type,
-                    noOfAnswer: question.noOfAnswer,
-                    options: formattedOptions
-                };
-            })
-        );
-
-        res.status(200).json({
-            success: true,
-            totalQuestions: questions.length,
-            exam_test_id,
-            questions: questionsWithOptions
-        });
-
-    } catch (error) {
-        console.error("Error fetching questions:", error);
-        res.status(500).json({ success: false, message: "Server Error" });
-    }
-};
-
-const getQuestionsByExamTestId = async (req, res) => {
-    try {
-        const { exam_test_id } = req.params;
-        console.log('Fetching questions for exam test ID:', exam_test_id);
-
-        const questions = await ExamQuestion.findByExamTestId(exam_test_id);
-        if (questions.length === 0) {
-            return res.status(404).json({ message: 'No questions found for this exam test' });
-        }
-
-        res.status(200).json({ questions });
-    } catch (error) {
-        console.error('Error in getQuestionsByExamTestId:', error);
-        res.status(500).json({ message: 'Server error' });
-    }
-};
-
-const deleteExamQuestion = async (req, res) => {
-    try {
-        const { exam_question_id } = req.params;
-
-        const deleted = await ExamQuestion.deleteById(exam_question_id);
-        if (!deleted) {
-            return res.status(404).json({ message: 'Exam question not found' });
-        }
-
-        res.status(200).json({ message: 'Exam question deleted successfully' });
-    } catch (error) {
-        console.error('Error deleting exam question:', error);
-        res.status(500).json({ message: 'Server error' });
-    }
-};
-
+// Get all exam tests
 const getAllExamTests = async (req, res) => {
     try {
         console.log('Fetching all exam tests...');
+        const examTests = await ExamTest.findAll();
 
-        const [examTests] = await db.execute("SELECT * FROM exam_tests ORDER BY created_at DESC");
-
-        if (examTests.length === 0) {
+        if (!examTests || examTests.length === 0) {
             return res.status(404).json({ message: 'No exam tests found' });
         }
 
         const examTestsWithTotalQuestions = await Promise.all(
             examTests.map(async (examTest) => {
-                const [questionCount] = await db.execute(
-                    "SELECT COUNT(*) AS totalQuestions FROM exam_questions WHERE exam_test_id = ?",
-                    [examTest.id]
-                );
-                return {
-                    ...examTest,
-                    totalQuestions: questionCount[0]?.totalQuestions || 0
+                const totalQuestions = await ExamTest.getTotalQuestions(examTest.id);
+                console.log(`Exam ID: ${examTest.id}, Total Questions: ${totalQuestions}`); // Debugging log
+                return { 
+                    id: examTest.id, 
+                    title: examTest.title, 
+                    description: examTest.description, 
+                    duration: examTest.duration, 
+                    created_at: examTest.created_at, 
+                    totalQuestions: totalQuestions // Ensure correct value
                 };
             })
         );
 
-        res.status(200).json({
-            success: true,
-            totalTests: examTests.length,
-            examTests: examTestsWithTotalQuestions
-        });
-
+        res.status(200).json({ examTests: examTestsWithTotalQuestions });
     } catch (error) {
         console.error('Error in getAllExamTests:', error);
         res.status(500).json({ message: 'Server error' });
     }
 };
+// Get an exam test by ID
+const getExamTestById = async (req, res) => {
+    try {
+        const { id } = req.params;
+        console.log('Fetching exam test with ID:', id);
 
-module.exports = {
-    createExamQuestion,
-    getExamQuestionsByExamTestId,
-    getQuestionsByExamTestId,
-    deleteExamQuestion,
-    getAllExamTests
+        const examTest = await ExamTest.findById(id);
+        if (!examTest) {
+            return res.status(404).json({ message: 'Exam test not found' });
+        }
+
+        // Calculate totalQuestions for the exam test
+        const totalQuestions = await ExamTest.getTotalQuestions(id);
+
+        res.status(200).json({ examTest: { ...examTest, totalQuestions } });
+    } catch (error) {
+        console.error('Error in getExamTestById:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
 };
+
+// Delete an exam test by ID
+const deleteExamTestById = async (req, res) => {
+    try {
+        const { id } = req.params;
+        console.log('Deleting exam test with ID:', id);
+
+        // Check if the exam test exists
+        const examTest = await ExamTest.findById(id);
+        if (!examTest) {
+            return res.status(404).json({ message: 'Exam test not found' });
+        }
+
+        // Delete the exam test
+        await ExamTest.deleteById(id);
+        res.status(200).json({ message: 'Exam test deleted successfully' });
+    } catch (error) {
+        console.error('Error in deleteExamTestById:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+const deleteExamTest = async (req, res) => {
+    try {
+        const { exam_test_id } = req.params;
+        console.log(`Deleting exam test with ID: ${exam_test_id}`);
+
+        // Check if the exam test exists
+        const [examTest] = await db.execute("SELECT * FROM exam_tests WHERE id = ?", [exam_test_id]);
+        if (examTest.length === 0) {
+            return res.status(404).json({ message: "Exam test not found" });
+        }
+
+        // Delete all questions associated with this exam test
+        await db.execute("DELETE FROM exam_questions WHERE exam_test_id = ?", [exam_test_id]);
+
+        // Delete the exam test itself
+        await db.execute("DELETE FROM exam_tests WHERE id = ?", [exam_test_id]);
+
+        res.status(200).json({ success: true, message: "Exam test deleted successfully" });
+
+    } catch (error) {
+        console.error("Error in deleteExamTest:", error);
+        res.status(500).json({ success: false, message: "Server error" });
+    }
+};
+
+
+module.exports = { createExamTest, getAllExamTests, getExamTestById, deleteExamTestById, deleteExamTest };
