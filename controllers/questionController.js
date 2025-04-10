@@ -87,35 +87,13 @@ const getQuestionsByChapterId = async (req, res) => {
             return res.status(404).json({ message: 'Chapter not found' });
         }
 
-        // Fetch questions for the given chapter_id
+        // Fetch questions with options for the given chapter_id
         const questions = await Question.findByChapterId(chapter_id);
         if (questions.length === 0) {
             return res.status(404).json({ message: 'No questions found for this chapter' });
         }
 
-        // Fetch options for each question and format the response
-        const formattedQuestions = [];
-
-        for (const question of questions) {
-            const options = await Option.findByQuestionId(question.id); // Fetch options by question ID
-
-            // Structure the question and options in the desired format
-            const formattedQuestion = {
-                chapter_id: question.chapter_id,
-                question: question.question,
-                type: question.type,
-                noOfAnswer: question.noOfAnswer,
-                options: options.map(option => ({
-                    option: option.option,
-                    isAnswer: option.isAnswer,
-                })),
-            };
-
-            formattedQuestions.push(formattedQuestion);
-        }
-
-        // Send the formatted questions as the response
-        res.status(200).json({ questions: formattedQuestions });
+        res.status(200).json({ questions });
     } catch (error) {
         console.error('Error in getQuestionsByChapterId:', error);
         res.status(500).json({ message: 'Server error' });
