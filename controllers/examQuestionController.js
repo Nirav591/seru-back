@@ -6,8 +6,6 @@ const db = require('../config/db');
 
 const createExamQuestion = async (req, res) => {
     try {
-      console.log('Request Body:', req.body);
-  
       const { exam_test_id, question, type, noOfAnswer, options } = req.body;
       console.log('Extracted Data:', { exam_test_id, question, type, noOfAnswer, options });
   
