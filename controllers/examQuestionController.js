@@ -6,43 +6,53 @@ const db = require('../config/db');
 
 const createExamQuestion = async (req, res) => {
     try {
-        console.log('Request Body:', req.body);
-
-        const { exam_test_id, question, type, noOfAnswer, options } = req.body;
-        console.log('Extracted Data:', { exam_test_id, question, type, noOfAnswer, options });
-
-        // ✅ Check if exam_test_id exists
-        const [examTest] = await db.execute("SELECT id FROM exam_tests WHERE id = ?", [exam_test_id]);
-        if (examTest.length === 0) {
-            return res.status(400).json({ message: "Invalid exam_test_id: No such exam test exists." });
-        }
-
-        // ✅ Check if the question already exists for this exam test
-        const existingQuestion = await ExamQuestion.findByExamTestAndQuestion(exam_test_id, question);
-        if (existingQuestion) {
-            console.log('Question already exists:', existingQuestion);
-            return res.status(400).json({ message: 'Question already exists for this exam test' });
-        }
-
-        // ✅ Insert the exam question
-        console.log('Creating exam question...');
-        const examQuestionId = await ExamQuestion.create({ exam_test_id, question, type, noOfAnswer });
-        console.log('Exam question created with ID:', examQuestionId);
-
-        // ✅ Insert options
-        console.log('Creating options...');
-        for (const option of options) {
-            console.log('Inserting option:', option);
-            await ExamOption.create({ exam_question_id: examQuestionId, ...option });
-        }
-
-        res.status(201).json({ message: 'Exam question created successfully' });
-
+      console.log('Request Body:', req.body);
+  
+      const { exam_test_id, question, type, noOfAnswer, options } = req.body;
+      console.log('Extracted Data:', { exam_test_id, question, type, noOfAnswer, options });
+  
+      // ✅ Check if exam_test_id exists
+      const [examTest] = await db.execute("SELECT id FROM exam_tests WHERE id = ?", [exam_test_id]);
+      if (examTest.length === 0) {
+        return res.status(400).json({ message: "Invalid exam_test_id: No such exam test exists." });
+      }
+  
+      // ✅ Check how many questions already exist for this exam test
+      const [existingQuestions] = await db.execute(
+        "SELECT COUNT(*) AS questionCount FROM exam_questions WHERE exam_test_id = ?",
+        [exam_test_id]
+      );
+      const currentCount = existingQuestions[0].questionCount;
+      if (currentCount >= 37) {
+        return res.status(400).json({ message: "You can only add up to 37 questions for this exam test." });
+      }
+  
+      // ✅ Check if the question already exists for this exam test
+      const existingQuestion = await ExamQuestion.findByExamTestAndQuestion(exam_test_id, question);
+      if (existingQuestion) {
+        console.log('Question already exists:', existingQuestion);
+        return res.status(400).json({ message: 'Question already exists for this exam test' });
+      }
+  
+      // ✅ Insert the exam question
+      console.log('Creating exam question...');
+      const examQuestionId = await ExamQuestion.create({ exam_test_id, question, type, noOfAnswer });
+      console.log('Exam question created with ID:', examQuestionId);
+  
+      // ✅ Insert options
+      console.log('Creating options...');
+      for (const option of options) {
+        console.log('Inserting option:', option);
+        await ExamOption.create({ exam_question_id: examQuestionId, ...option });
+      }
+  
+      res.status(201).json({ message: 'Exam question created successfully' });
+  
     } catch (error) {
-        console.error('Error in createExamQuestion:', error);
-        res.status(500).json({ message: 'Server error' });
+      console.error('Error in createExamQuestion:', error);
+      res.status(500).json({ message: 'Server error' });
     }
-};
+  };
 
 const getExamQuestionsByExamTestId = async (req, res) => {
     try {
