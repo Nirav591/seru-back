@@ -66,8 +66,36 @@ const createQuestion = async (req, res) => {
 const getAllQuestions = async (req, res) => {
     try {
         console.log('Fetching all questions...');
+
+        // Fetch all questions
         const questions = await Question.findAll();
-        res.status(200).json({ questions });
+        if (questions.length === 0) {
+            return res.status(404).json({ message: 'No questions found' });
+        }
+
+        // Format the questions and options
+        const formattedQuestions = [];
+
+        for (const question of questions) {
+            const options = await Option.findByQuestionId(question.id); // Fetch options by question ID
+
+            // Structure the question and options in the desired format
+            const formattedQuestion = {
+                chapter_id: question.chapter_id,
+                question: question.question,
+                type: question.type,
+                noOfAnswer: question.noOfAnswer,
+                options: options.map(option => ({
+                    option: option.option,
+                    isAnswer: option.isAnswer,
+                })),
+            };
+
+            formattedQuestions.push(formattedQuestion);
+        }
+
+        // Send the formatted questions as the response
+        res.status(200).json({ questions: formattedQuestions });
     } catch (error) {
         console.error('Error in getAllQuestions:', error);
         res.status(500).json({ message: 'Server error' });
