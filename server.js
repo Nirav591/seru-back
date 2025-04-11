@@ -21,7 +21,8 @@ const allowedOrigins = [
     "http://localhost:3039",
     "https://13.40.120.157:6340",
     "https://sheru.solidblackabroad.com",
-    "https://admin.solidblackabroad.com"
+    "https://admin.solidblackabroad.com",
+    "http://seru-admin.solidblackabroad.com"
 ];
 
 app.use(cors({
