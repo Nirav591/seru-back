@@ -1,21 +1,23 @@
 const express = require('express');
-const { createExamTest, getAllExamTests, getExamTestById, deleteExamTestById, deleteExamTest } = require('../controllers/examTestController');
+const {
+  createExamTest,
+  getAllExamTests,
+  getExamTestById,
+  deleteExamTestById,
+  deleteExamTest,
+  createQuestion // ✅ include it here directly
+} = require('../controllers/examTestController');
 
 const router = express.Router();
 
-// POST API to create an exam test
+// ✅ Question Route
+router.post('/add-question', createQuestion);
+
+// ✅ Exam Test Routes
 router.post('/exam-tests', createExamTest);
-
-// GET API to fetch all exam tests
 router.get('/exam-tests', getAllExamTests);
-
-// GET API to fetch an exam test by ID
 router.get('/exam-tests/:id', getExamTestById);
-
-// DELETE API to delete an exam test by ID
 router.delete('/exam-tests/:id', deleteExamTestById);
-
-router.delete('/exam-tests/:exam_test_id', deleteExamTest);
-
+router.delete('/exam-tests/:exam_test_id', deleteExamTest); // This one might overlap, double check logic
 
 module.exports = router;
