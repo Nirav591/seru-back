@@ -58,3 +58,32 @@ exports.addQuestionsToExam = async (req, res) => {
       res.status(500).json({ message: "Failed to add questions", error });
     }
   };
+
+  // GET all exams
+exports.getAllExams = async (req, res) => {
+    try {
+      const [exams] = await db.execute("SELECT * FROM exams ORDER BY id DESC");
+      res.status(200).json(exams);
+    } catch (error) {
+      console.error("DB Error:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  };
+  
+  // GET exam by ID
+  exports.getExamById = async (req, res) => {
+    const examId = req.params.id;
+  
+    try {
+      const [exams] = await db.execute("SELECT * FROM exams WHERE id = ?", [examId]);
+  
+      if (exams.length === 0) {
+        return res.status(404).json({ message: "Exam not found" });
+      }
+  
+      res.status(200).json(exams[0]);
+    } catch (error) {
+      console.error("DB Error:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  };

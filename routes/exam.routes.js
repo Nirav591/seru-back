@@ -8,4 +8,7 @@ const { questionArraySchema } = require("../validators/examQuestionValidator");
 router.post("/", examController.createExam);
 router.post("/:examId/questions", validate(questionArraySchema), examController.addQuestionsToExam);
 
+router.get("/", examController.getAllExams);
+router.get("/:id", examController.getExamById);
+
 module.exports = router;
