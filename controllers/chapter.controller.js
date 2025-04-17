@@ -1,4 +1,4 @@
-const db = require("../db"); // assuming your pool file is db.js
+const db = require("../config/db"); // assuming your pool file is db.js
 
 exports.createChapter = async (req, res) => {
   const { title, index_number, content } = req.body;
