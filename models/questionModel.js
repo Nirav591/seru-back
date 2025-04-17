@@ -78,19 +78,29 @@ class Question {
     }
 }
 
-class Option {
-    static async create(option) {
-        const { question_id, option: text, isAnswer } = option;
-        await db.execute(
-            'INSERT INTO options (question_id, `option`, isAnswer) VALUES (?, ?, ?)',
-            [question_id, text, isAnswer]
-        );
+const Option = {
+    // ✅ Add this function to fetch options by question ID
+    async findByQuestionId(questionId) {
+      const [rows] = await db.query(
+        'SELECT id, option AS option, isAnswer FROM options WHERE question_id = ?',
+        [questionId]
+      );
+      return rows;
+    },
+  
+    // (Optional) Create and Delete methods already used in controller
+    async create({ question_id, option, isAnswer }) {
+      const [result] = await db.query(
+        'INSERT INTO options (question_id, option, isAnswer) VALUES (?, ?, ?)',
+        [question_id, option, isAnswer]
+      );
+      return result.insertId;
+    },
+  
+    async deleteByQuestionId(questionId) {
+      await db.query('DELETE FROM options WHERE question_id = ?', [questionId]);
     }
-
-    // Delete options by question ID
-    static async deleteByQuestionId(question_id) {
-        await db.execute('DELETE FROM options WHERE question_id = ?', [question_id]);
-    }
-}
+  };
+  
 
 module.exports = { Question, Option };
