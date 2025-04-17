@@ -75,13 +75,31 @@ exports.getAllExams = async (req, res) => {
     const examId = req.params.id;
   
     try {
-      const [exams] = await db.execute("SELECT * FROM exams WHERE id = ?", [examId]);
-  
-      if (exams.length === 0) {
+      // 1. Get exam
+      const [examRows] = await db.execute("SELECT * FROM exams WHERE id = ?", [examId]);
+      if (examRows.length === 0) {
         return res.status(404).json({ message: "Exam not found" });
       }
   
-      res.status(200).json(exams[0]);
+      const exam = examRows[0];
+  
+      // 2. Get questions linked to this exam
+      const [questions] = await db.execute("SELECT * FROM exam_questions WHERE exam_id = ?", [examId]);
+  
+      // 3. Attach options to each question
+      for (const question of questions) {
+        const [options] = await db.execute(
+          "SELECT id, option_text, is_answer FROM exam_options WHERE question_id = ?",
+          [question.id]
+        );
+        question.options = options;
+      }
+  
+      // 4. Attach questions and question count to the exam
+      exam.questions = questions;
+      exam.question_count = questions.length;
+  
+      res.status(200).json(exam);
     } catch (error) {
       console.error("DB Error:", error);
       res.status(500).json({ message: "Internal server error" });
