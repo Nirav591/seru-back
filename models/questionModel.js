@@ -82,20 +82,19 @@ const Option = {
     // ✅ Add this function to fetch options by question ID
     async findByQuestionId(questionId) {
         const [rows] = await db.query(
-          'SELECT id, `option` AS option, isAnswer FROM options WHERE question_id = ?',
+          'SELECT id, option_text AS option, isAnswer FROM options WHERE question_id = ?',
           [questionId]
         );
         return rows;
       },
-  
     // (Optional) Create and Delete methods already used in controller
     async create({ question_id, option, isAnswer }) {
-      const [result] = await db.query(
-        'INSERT INTO options (question_id, option, isAnswer) VALUES (?, ?, ?)',
-        [question_id, option, isAnswer]
-      );
-      return result.insertId;
-    },
+        const [result] = await db.query(
+          'INSERT INTO options (question_id, option_text, isAnswer) VALUES (?, ?, ?)',
+          [question_id, option, isAnswer]
+        );
+        return result.insertId;
+      },
   
     async deleteByQuestionId(questionId) {
       await db.query('DELETE FROM options WHERE question_id = ?', [questionId]);
