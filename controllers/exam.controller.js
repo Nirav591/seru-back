@@ -105,3 +105,56 @@ exports.getAllExams = async (req, res) => {
       res.status(500).json({ message: "Internal server error" });
     }
   };
+
+  exports.deleteExamQuestion = async (req, res) => {
+    const questionId = req.params.id;
+  
+    try {
+      // Delete options first due to foreign key constraint
+      await db.execute("DELETE FROM exam_options WHERE question_id = ?", [questionId]);
+  
+      const [result] = await db.execute("DELETE FROM exam_questions WHERE id = ?", [questionId]);
+  
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ message: "Question not found" });
+      }
+  
+      res.status(200).json({ message: "Question deleted successfully" });
+    } catch (error) {
+      console.error("DB Error:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  };
+
+  exports.updateExamQuestion = async (req, res) => {
+    const questionId = req.params.id;
+    const { question, type, noOfAnswer, options } = req.body;
+  
+    try {
+      // Update question fields
+      const [updateResult] = await db.execute(
+        "UPDATE exam_questions SET question = ?, type = ?, no_of_answer = ? WHERE id = ?",
+        [question, type, noOfAnswer, questionId]
+      );
+  
+      if (updateResult.affectedRows === 0) {
+        return res.status(404).json({ message: "Question not found" });
+      }
+  
+      // Delete old options
+      await db.execute("DELETE FROM exam_options WHERE question_id = ?", [questionId]);
+  
+      // Insert new options
+      for (const opt of options) {
+        await db.execute(
+          "INSERT INTO exam_options (id, question_id, option_text, is_answer) VALUES (?, ?, ?, ?)",
+          [opt.id, questionId, opt.option, opt.isAnswer]
+        );
+      }
+  
+      res.status(200).json({ message: "Question updated successfully" });
+    } catch (error) {
+      console.error("DB Error:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  };

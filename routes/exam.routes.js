@@ -11,4 +11,7 @@ router.post("/:examId/questions", validate(questionArraySchema), examController.
 router.get("/", examController.getAllExams);
 router.get("/:id", examController.getExamById);
 
+router.put("/questions/:id", examController.updateExamQuestion);
+router.delete("/questions/:id", examController.deleteExamQuestion);
+
 module.exports = router;
