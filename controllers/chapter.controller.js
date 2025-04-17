@@ -153,10 +153,10 @@ exports.getFullChapter = async (req, res) => {
   
       const chapter = chapterRows[0];
   
-      // Fetch all questions under this chapter
+      // Fetch questions
       const [questions] = await db.execute("SELECT * FROM questions WHERE chapter_id = ?", [chapterId]);
   
-      // Fetch options for each question
+      // Attach options to each question
       for (let question of questions) {
         const [options] = await db.execute(
           "SELECT id, option_text, is_answer FROM options WHERE question_id = ?",
@@ -165,8 +165,9 @@ exports.getFullChapter = async (req, res) => {
         question.options = options;
       }
   
-      // Nest questions inside the chapter
+      // Add questions and question_count
       chapter.questions = questions;
+      chapter.question_count = questions.length;
   
       res.status(200).json(chapter);
     } catch (error) {
