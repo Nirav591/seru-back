@@ -22,3 +22,41 @@ exports.createChapter = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
+exports.getChapterById = async (req, res) => {
+    const chapterId = req.params.id;
+  
+    try {
+      const [rows] = await db.execute("SELECT * FROM chapters WHERE id = ?", [chapterId]);
+  
+      if (rows.length === 0) {
+        return res.status(404).json({ message: "Chapter not found" });
+      }
+  
+      res.status(200).json(rows[0]);
+    } catch (error) {
+      console.error("DB error:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  };
+
+  exports.updateChapter = async (req, res) => {
+    const chapterId = req.params.id;
+    const { title, index_number, content } = req.body;
+  
+    try {
+      const [result] = await db.execute(
+        "UPDATE chapters SET title = ?, index_number = ?, content = ? WHERE id = ?",
+        [title, index_number, content, chapterId]
+      );
+  
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ message: "Chapter not found" });
+      }
+  
+      res.status(200).json({ message: "Chapter updated successfully" });
+    } catch (error) {
+      console.error("DB error:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  };
