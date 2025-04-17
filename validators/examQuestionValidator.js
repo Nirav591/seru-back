@@ -23,5 +23,5 @@ const questionSchema = Joi.object({
 const questionArraySchema = Joi.array().items(questionSchema).max(37).required();
 
 module.exports = {
-  questionArraySchema, // ✅ This is what makes it work
+  questionArraySchema,
 };
