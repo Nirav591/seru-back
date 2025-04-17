@@ -65,15 +65,26 @@ const createQuestion = async (req, res) => {
 
 const getAllQuestions = async (req, res) => {
     try {
-        console.log('Fetching all questions...');
-        const questions = await Question.findAll();
-        res.status(200).json({ questions });
+      console.log('Fetching all questions...');
+      const questions = await Question.findAll();
+  
+      // For each question, get its options
+      const questionsWithOptions = await Promise.all(
+        questions.map(async (q) => {
+          const options = await Option.findByQuestionId(q.id);
+          return {
+            ...q,
+            options,
+          };
+        })
+      );
+  
+      res.status(200).json({ questions: questionsWithOptions });
     } catch (error) {
-        console.error('Error in getAllQuestions:', error);
-        res.status(500).json({ message: 'Server error' });
+      console.error('Error in getAllQuestions:', error);
+      res.status(500).json({ message: 'Server error' });
     }
-};
-
+  };
 // Get questions by chapter ID
 const getQuestionsByChapterId = async (req, res) => {
     try {
