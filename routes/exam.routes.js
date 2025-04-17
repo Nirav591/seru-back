@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const examController = require("../controllers/exam.controller");
+const validate = require("../middleware/validate");
 
 router.post("/", examController.createExam);
 
