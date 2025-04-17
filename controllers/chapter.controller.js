@@ -91,27 +91,51 @@ exports.deleteChapter = async (req, res) => {
 exports.addQuestionsToChapter = async (req, res) => {
     const chapterId = req.params.chapterId;
     const questions = req.body;
-  
+
     try {
-      for (const q of questions) {
-        // Insert question
-        await db.execute(
-          "INSERT INTO questions (id, chapter_id, question, type, no_of_answer) VALUES (?, ?, ?, ?, ?)",
-          [q.id, chapterId, q.question, q.type, q.noOfAnswer]
-        );
-  
-        // Insert options
-        for (const opt of q.options) {
-          await db.execute(
-            "INSERT INTO options (id, question_id, option_text, is_answer) VALUES (?, ?, ?, ?)",
-            [opt.id, q.id, opt.option, opt.isAnswer]
-          );
+        for (const q of questions) {
+            // Insert question
+            await db.execute(
+                "INSERT INTO questions (id, chapter_id, question, type, no_of_answer) VALUES (?, ?, ?, ?, ?)",
+                [q.id, chapterId, q.question, q.type, q.noOfAnswer]
+            );
+
+            // Insert options
+            for (const opt of q.options) {
+                await db.execute(
+                    "INSERT INTO options (id, question_id, option_text, is_answer) VALUES (?, ?, ?, ?)",
+                    [opt.id, q.id, opt.option, opt.isAnswer]
+                );
+            }
         }
-      }
-  
-      res.status(201).json({ message: "Questions and options added successfully" });
+
+        res.status(201).json({ message: "Questions and options added successfully" });
     } catch (error) {
-      console.error("DB error:", error);
-      res.status(500).json({ message: "Failed to add questions", error });
+        console.error("DB error:", error);
+        res.status(500).json({ message: "Failed to add questions", error });
     }
-  };
+};
+
+exports.getQuestionsByChapter = async (req, res) => {
+    const chapterId = req.params.id;
+
+    try {
+        const [questions] = await db.execute(
+            "SELECT * FROM questions WHERE chapter_id = ?",
+            [chapterId]
+        );
+
+        for (let question of questions) {
+            const [options] = await db.execute(
+                "SELECT id, option_text, is_answer FROM options WHERE question_id = ?",
+                [question.id]
+            );
+            question.options = options;
+        }
+
+        res.status(200).json(questions);
+    } catch (error) {
+        console.error("DB error:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+};

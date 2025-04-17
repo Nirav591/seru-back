@@ -8,5 +8,6 @@ router.get("/:id", chapterController.getChapterById);
 router.put("/:id", chapterController.updateChapter);
 router.delete("/:id", chapterController.deleteChapter); 
 router.post("/:chapterId/questions", chapterController.addQuestionsToChapter);
+router.get("/:id/questions", chapterController.getQuestionsByChapter);
 
 module.exports = router;
