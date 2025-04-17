@@ -4,20 +4,19 @@ const {
   getAllExamTests,
   getExamTestById,
   deleteExamTestById,
-  deleteExamTest,
-  createQuestion // ✅ include it here directly
+  deleteExamTest
 } = require('../controllers/examTestController');
+
+const { createQuestion } = require('../controllers/questionController'); // ✅ Corrected
 
 const router = express.Router();
 
-// ✅ Question Route
-router.post('/add-question', createQuestion);
+router.post('/add-question', createQuestion); // ✅ Now it works
 
-// ✅ Exam Test Routes
 router.post('/exam-tests', createExamTest);
 router.get('/exam-tests', getAllExamTests);
 router.get('/exam-tests/:id', getExamTestById);
 router.delete('/exam-tests/:id', deleteExamTestById);
-router.delete('/exam-tests/:exam_test_id', deleteExamTest); // This one might overlap, double check logic
+router.delete('/exam-tests/:exam_test_id', deleteExamTest);
 
 module.exports = router;
