@@ -6,6 +6,7 @@ router.post("/", chapterController.createChapter);
 router.get("/", chapterController.getAllChapters);          // ✅ GET all
 router.get("/:id", chapterController.getChapterById);
 router.put("/:id", chapterController.updateChapter);
-router.delete("/:id", chapterController.deleteChapter);     // ✅ DELETE
+router.delete("/:id", chapterController.deleteChapter); 
+router.post("/:chapterId/questions", chapterController.addQuestionsToChapter); 
 
 module.exports = router;
