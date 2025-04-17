@@ -139,3 +139,38 @@ exports.getQuestionsByChapter = async (req, res) => {
         res.status(500).json({ message: "Internal server error" });
     }
 };
+
+exports.getFullChapter = async (req, res) => {
+    const chapterId = req.params.id;
+  
+    try {
+      // Fetch chapter details
+      const [chapterRows] = await db.execute("SELECT * FROM chapters WHERE id = ?", [chapterId]);
+  
+      if (chapterRows.length === 0) {
+        return res.status(404).json({ message: "Chapter not found" });
+      }
+  
+      const chapter = chapterRows[0];
+  
+      // Fetch all questions under this chapter
+      const [questions] = await db.execute("SELECT * FROM questions WHERE chapter_id = ?", [chapterId]);
+  
+      // Fetch options for each question
+      for (let question of questions) {
+        const [options] = await db.execute(
+          "SELECT id, option_text, is_answer FROM options WHERE question_id = ?",
+          [question.id]
+        );
+        question.options = options;
+      }
+  
+      // Nest questions inside the chapter
+      chapter.questions = questions;
+  
+      res.status(200).json(chapter);
+    } catch (error) {
+      console.error("DB error:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  };
