@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const chapterController = require("../controllers/chapter.controller");
 const { questionsArraySchema } = require("../validators/questionValidator");
-
+const validate = require("../middleware/validate");
 
 router.post("/", chapterController.createChapter);
 router.get("/", chapterController.getAllChapters);          // ✅ GET all
