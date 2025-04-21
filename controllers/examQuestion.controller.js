@@ -1,4 +1,7 @@
 const ExamQuestion = require('../models/examQuestion.model');
+const db = require('../config/db');
+
+
 
 exports.addQuestion = async (req, res) => {
     try {
