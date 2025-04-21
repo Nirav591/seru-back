@@ -22,15 +22,21 @@ const Question = {
       'SELECT * FROM questions WHERE chapter_id = ?',
       [chapter_id]
     );
-
+  
     for (const q of questions) {
       const [options] = await db.query(
         'SELECT * FROM options WHERE question_id = ?',
         [q.id]
       );
-      q.options = options;
+  
+      // ✅ Reset option IDs to start from 1
+      q.options = options.map((opt, index) => ({
+        id: index + 1, // Reset for frontend display
+        option: opt.option_text,
+        isAnswer: Boolean(opt.is_answer),
+      }));
     }
-
+  
     return questions;
   },
 
