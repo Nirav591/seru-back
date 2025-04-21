@@ -72,8 +72,8 @@ exports.updateExam = async (req, res) => {
 
     res.json({ message: 'Exam updated successfully.' });
   } catch (err) {
-    console.error('Update Exam Error:', err);
-    res.status(500).json({ message: 'Failed to update exam.' });
+    console.error('Update Exam Error:', err); // ✅ log error here
+    res.status(500).json({ message: 'Update failed' });
   }
 };
 

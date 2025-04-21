@@ -6,15 +6,29 @@ const ExamQuestion = {
       'INSERT INTO exam_questions (exam_id, question, type, no_of_answer) VALUES (?, ?, ?, ?)',
       [exam_id, question, type, noOfAnswer]
     );
-
+  
     const questionId = qResult.insertId;
-
-    const optionValues = options.map(o => [id, o.option, o.isAnswer]);
-    await db.query(
-      'INSERT INTO exam_options (question_id, option_text, is_answer) VALUES ?',
-      [optionValues]
-    );
-
+  
+    if (!questionId) {
+      throw new Error('Failed to create question — no questionId returned.');
+    }
+  
+    if (!Array.isArray(options)) {
+      throw new Error('Options array is missing or invalid');
+    }
+  
+    const optionValues = options.map((o) => [questionId, o.option, o.isAnswer]);
+  
+    try {
+      await db.query(
+        'INSERT INTO exam_options (question_id, option_text, is_answer) VALUES ?',
+        [optionValues]
+      );
+    } catch (err) {
+      console.error('❌ Failed to insert options:', err); // <-- log it here
+      throw err;
+    }
+  
     return questionId;
   },
 
@@ -57,9 +71,13 @@ const ExamQuestion = {
       'UPDATE exam_questions SET question = ?, type = ?, no_of_answer = ? WHERE id = ?',
       [question, type, noOfAnswer, id]
     );
-
+  
     await db.query('DELETE FROM exam_options WHERE question_id = ?', [id]);
-
+  
+    if (!Array.isArray(options)) {
+      throw new Error('Options array is missing or invalid');
+    }
+  
     const optionValues = options.map(o => [id, o.option, o.isAnswer]);
     await db.query(
       'INSERT INTO exam_options (question_id, option_text, is_answer) VALUES ?',

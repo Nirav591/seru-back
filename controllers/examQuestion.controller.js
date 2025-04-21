@@ -8,17 +8,6 @@ exports.addQuestion = async (req, res) => {
     const exam_id = req.params.id;
     const questionText = req.body.question.trim();
 
-    // Count existing questions for this exam
-    const [countResult] = await db.query(
-      'SELECT COUNT(*) AS total FROM exam_questions WHERE exam_id = ?',
-      [exam_id]
-    );
-
-    if (countResult[0].total >= 37) {
-      return res.status(400).json({ message: 'This exam already has 37 questions.' });
-    }
-
-    // Check duplicate
     const duplicate = await ExamQuestion.findDuplicate(exam_id, questionText);
     if (duplicate.length > 0) {
       return res.status(409).json({ message: 'Duplicate question exists' });
@@ -27,8 +16,8 @@ exports.addQuestion = async (req, res) => {
     const questionId = await ExamQuestion.create({ exam_id, ...req.body });
     res.status(201).json({ message: 'Question added', questionId });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Error adding question' });
+    console.error('❌ Error in addQuestion:', err); // log exact problem
+    res.status(500).json({ message: 'Error adding question', error: err.message });
   }
 };
 
