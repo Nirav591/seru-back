@@ -1,18 +1,9 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
-const chapterController = require("../controllers/chapter.controller");
-const { questionsArraySchema } = require("../validators/questionValidator");
-const validate = require("../middleware/validate");
+const chapterController = require('../controllers/chapter.controller');
 
-router.post("/", chapterController.createChapter);
-router.get("/", chapterController.getAllChapters);          // ✅ GET all
-router.get("/:id", chapterController.getChapterById);
-router.put("/:id", chapterController.updateChapter);
-router.delete("/:id", chapterController.deleteChapter); 
-router.post("/:chapterId/questions", chapterController.addQuestionsToChapter);
-router.get("/:id/questions", chapterController.getQuestionsByChapter);
-router.get("/:id/full", chapterController.getFullChapter);
-router.post("/:chapterId/questions", validate(questionsArraySchema), chapterController.addQuestionsToChapter);
-router.delete("/questions/:id", chapterController.deleteQuestion);
+router.post('/chapters', chapterController.createChapter);
+router.get('/chapters', chapterController.getAllChapters);
+router.get('/chapters/:id', chapterController.getChapterById);
 
 module.exports = router;
