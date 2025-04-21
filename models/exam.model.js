@@ -38,6 +38,18 @@ const Exam = {
   
     rows[0].totalQuestions = count[0].total;
     return rows[0];
+  },
+  update: async (id, { title, description, duration }) => {
+    const [result] = await db.query(
+      'UPDATE exams SET title = ?, description = ?, duration = ? WHERE id = ?',
+      [title, description, duration, id]
+    );
+    return result;
+  },
+  
+  delete: async (id) => {
+    const [result] = await db.query('DELETE FROM exams WHERE id = ?', [id]);
+    return result;
   }
 };
 

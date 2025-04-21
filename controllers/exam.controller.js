@@ -51,3 +51,43 @@ exports.getExamById = async (req, res) => {
     res.status(500).json({ message: 'Failed to fetch exam' });
   }
 };
+
+exports.updateExam = async (req, res) => {
+  try {
+    const { title, description, duration } = req.body;
+
+    if (!title || !description || !duration) {
+      return res.status(400).json({ message: 'Title, description, and duration are required.' });
+    }
+
+    const result = await Exam.update(req.params.id, {
+      title: title.trim(),
+      description: description.trim(),
+      duration
+    });
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Exam not found.' });
+    }
+
+    res.json({ message: 'Exam updated successfully.' });
+  } catch (err) {
+    console.error('Update Exam Error:', err);
+    res.status(500).json({ message: 'Failed to update exam.' });
+  }
+};
+
+exports.deleteExam = async (req, res) => {
+  try {
+    const result = await Exam.delete(req.params.id);
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Exam not found.' });
+    }
+
+    res.json({ message: 'Exam deleted successfully.' });
+  } catch (err) {
+    console.error('Delete Exam Error:', err);
+    res.status(500).json({ message: 'Failed to delete exam.' });
+  }
+};
