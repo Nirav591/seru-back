@@ -1,4 +1,4 @@
-const db = require('../config/db'); // Make sure this is the promise version
+const db = require('../config/db');
 
 const Chapter = {
   create: async ({ title, index_number, content }) => {
@@ -25,6 +25,19 @@ const Chapter = {
   getById: async (id) => {
     const [rows] = await db.query('SELECT * FROM chapters WHERE id = ?', [id]);
     return rows;
+  },
+
+  update: async (id, { title, index_number, content }) => {
+    const [result] = await db.query(
+      'UPDATE chapters SET title = ?, index_number = ?, content = ? WHERE id = ?',
+      [title, index_number, content, id]
+    );
+    return result;
+  },
+
+  delete: async (id) => {
+    const [result] = await db.query('DELETE FROM chapters WHERE id = ?', [id]);
+    return result;
   }
 };
 
