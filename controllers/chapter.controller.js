@@ -1,58 +1,49 @@
 const Chapter = require('../models/chapter.model');
 
-exports.createChapter = (req, res) => {
+exports.createChapter = async (req, res) => {
+  try {
     const { title, index_number, content } = req.body;
 
     if (!title || !index_number || !content) {
-        return res.status(400).json({ message: 'All fields are required.' });
+      return res.status(400).json({ message: 'All fields are required.' });
     }
 
-    // Check for duplicate index_number or title
-    Chapter.findByTitleOrIndex(title, index_number, (err, results) => {
-        if (err) {
-            console.error('Error checking duplicates:', err);
-            return res.status(500).json({ message: 'Database error' });
-        }
+    const existing = await Chapter.findByTitleOrIndex(title, index_number);
 
-        if (results.length > 0) {
-            return res.status(409).json({ message: 'Chapter with the same title or index number already exists.' });
-        }
+    if (existing.length > 0) {
+      return res.status(409).json({ message: 'Chapter with the same title or index number already exists.' });
+    }
 
-        // If not duplicate, proceed to insert
-        Chapter.create({ title, index_number, content }, (err, result) => {
-            if (err) {
-                console.error('MySQL Error:', err);
-                return res.status(500).json({ message: 'Database error' });
-            }
-            res.status(201).json({ message: 'Chapter created', chapterId: result.insertId });
-        });
-    });
+    const result = await Chapter.create({ title, index_number, content });
+    res.status(201).json({ message: 'Chapter created', chapterId: result.insertId });
+  } catch (err) {
+    console.error('Error creating chapter:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
 };
 
-exports.getAllChapters = (req, res) => {
-    Chapter.getAll((err, results) => {
-        if (err) {
-            console.error('MySQL Error:', err);
-            return res.status(500).json({ message: 'Database error' });
-        }
-        res.status(200).json(results);
-    });
+exports.getAllChapters = async (req, res) => {
+  try {
+    const chapters = await Chapter.getAll();
+    res.status(200).json(chapters);
+  } catch (err) {
+    console.error('Error fetching chapters:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
 };
 
-// Get chapter by ID
-exports.getChapterById = (req, res) => {
+exports.getChapterById = async (req, res) => {
+  try {
     const { id } = req.params;
+    const chapter = await Chapter.getById(id);
 
-    Chapter.getById(id, (err, results) => {
-        if (err) {
-            console.error('MySQL Error:', err);
-            return res.status(500).json({ message: 'Database error' });
-        }
+    if (chapter.length === 0) {
+      return res.status(404).json({ message: 'Chapter not found' });
+    }
 
-        if (results.length === 0) {
-            return res.status(404).json({ message: 'Chapter not found' });
-        }
-
-        res.status(200).json(results[0]);
-    });
+    res.status(200).json(chapter[0]);
+  } catch (err) {
+    console.error('Error fetching chapter:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
 };

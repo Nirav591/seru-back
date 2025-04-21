@@ -1,26 +1,30 @@
-const db = require('../config/db');
+const db = require('../config/db'); // Make sure this is the promise version
 
 const Chapter = {
-  create: (chapterData, callback) => {
-    const { title, index_number, content } = chapterData;
-    const query = 'INSERT INTO chapters (title, index_number, content) VALUES (?, ?, ?)';
-    db.query(query, [title, index_number, content], callback);
+  create: async ({ title, index_number, content }) => {
+    const [result] = await db.query(
+      'INSERT INTO chapters (title, index_number, content) VALUES (?, ?, ?)',
+      [title, index_number, content]
+    );
+    return result;
   },
 
-  // New method to check duplicates
-  findByTitleOrIndex: (title, index_number, callback) => {
-    const query = 'SELECT * FROM chapters WHERE title = ? OR index_number = ?';
-    db.query(query, [title, index_number], callback);
+  findByTitleOrIndex: async (title, index_number) => {
+    const [rows] = await db.query(
+      'SELECT * FROM chapters WHERE title = ? OR index_number = ?',
+      [title, index_number]
+    );
+    return rows;
   },
 
-  getAll: (callback) => {
-    const query = 'SELECT * FROM chapters ORDER BY index_number ASC';
-    db.query(query, callback);
+  getAll: async () => {
+    const [rows] = await db.query('SELECT * FROM chapters ORDER BY index_number ASC');
+    return rows;
   },
 
-  getById: (id, callback) => {
-    const query = 'SELECT * FROM chapters WHERE id = ?';
-    db.query(query, [id], callback);
+  getById: async (id) => {
+    const [rows] = await db.query('SELECT * FROM chapters WHERE id = ?', [id]);
+    return rows;
   }
 };
 
