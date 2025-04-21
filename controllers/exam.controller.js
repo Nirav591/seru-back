@@ -38,3 +38,16 @@ exports.getAllExams = async (req, res) => {
     res.status(500).json({ message: 'Failed to fetch exams' });
   }
 };
+
+exports.getExamById = async (req, res) => {
+  try {
+    const exam = await Exam.getByIdWithQuestionCount(req.params.id);
+    if (!exam) {
+      return res.status(404).json({ message: 'Exam not found' });
+    }
+    res.json(exam);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Failed to fetch exam' });
+  }
+};

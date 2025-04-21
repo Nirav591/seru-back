@@ -14,5 +14,6 @@ router.get('/exams/:id/questions', questionController.getQuestions);
 router.get('/exam-questions/:id', questionController.getQuestionById);
 router.put('/exam-questions/:id', questionController.updateQuestion);
 router.delete('/exam-questions/:id', questionController.deleteQuestion);
+router.get('/exams/:id', examController.getExamById);
 
 module.exports = router;
