@@ -39,12 +39,25 @@ const Exam = {
     rows[0].totalQuestions = count[0].total;
     return rows[0];
   },
-  update: async (id, { title, description, duration }) => {
-    const [result] = await db.query(
-      'UPDATE exams SET title = ?, description = ?, duration = ? WHERE id = ?',
-      [title, description, duration, id]
+  update: async (id, { question, type, noOfAnswer, options }) => {
+    await db.query(
+      'UPDATE exam_questions SET question = ?, type = ?, no_of_answer = ? WHERE id = ?',
+      [question, type, noOfAnswer, id]
     );
-    return result;
+  
+    // Delete existing options
+    await db.query('DELETE FROM exam_options WHERE question_id = ?', [id]);
+  
+    // Validate options
+    if (!Array.isArray(options) || options.length === 0) {
+      throw new Error('Options array is required and cannot be empty');
+    }
+  
+    const optionValues = options.map(o => [id, o.option, o.isAnswer]);
+    await db.query(
+      'INSERT INTO exam_options (question_id, option_text, is_answer) VALUES ?',
+      [optionValues]
+    );
   },
   
   delete: async (id) => {

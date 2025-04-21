@@ -9,7 +9,7 @@ const ExamQuestion = {
 
     const questionId = qResult.insertId;
 
-    const optionValues = options.map(o => [questionId, o.option, o.isAnswer]);
+    const optionValues = options.map(o => [id, o.option, o.isAnswer]);
     await db.query(
       'INSERT INTO exam_options (question_id, option_text, is_answer) VALUES ?',
       [optionValues]
