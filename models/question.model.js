@@ -17,29 +17,42 @@ const Question = {
     return questionId;
   },
 
+
   getAllByChapterId: async (chapter_id) => {
     const [questions] = await db.query(
-      'SELECT * FROM questions WHERE chapter_id = ?',
+      'SELECT * FROM chapter_questions WHERE chapter_id = ?',
       [chapter_id]
     );
 
     for (const q of questions) {
       const [options] = await db.query(
-        'SELECT * FROM options WHERE question_id = ?',
+        'SELECT * FROM chapter_options WHERE question_id = ?',
         [q.id]
       );
-      q.options = options;
+
+      // 🔁 ✅ RESET OPTION IDs before returning
+      q.options = options.map((opt, index) => ({
+        id: index + 1, // Override with 1, 2, 3...
+        option: opt.option_text,
+        isAnswer: Boolean(opt.is_answer)
+      }));
     }
 
     return questions;
   },
 
   getById: async (id) => {
-    const [questions] = await db.query('SELECT * FROM questions WHERE id = ?', [id]);
+    const [questions] = await db.query('SELECT * FROM chapter_questions WHERE id = ?', [id]);
     if (!questions.length) return null;
 
-    const [options] = await db.query('SELECT * FROM options WHERE question_id = ?', [id]);
-    questions[0].options = options;
+    const [options] = await db.query('SELECT * FROM chapter_options WHERE question_id = ?', [id]);
+
+    questions[0].options = options.map((opt, index) => ({
+      id: index + 1,
+      option: opt.option_text,
+      isAnswer: Boolean(opt.is_answer)
+    }));
+
     return questions[0];
   },
 
