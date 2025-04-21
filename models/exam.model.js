@@ -12,6 +12,11 @@ const Exam = {
   getAll: async () => {
     const [rows] = await db.query('SELECT * FROM exams');
     return rows;
+  },
+
+  getByTitle: async (title) => {
+    const [rows] = await db.query('SELECT * FROM exams WHERE title = ?', [title]);
+    return rows;
   }
 };
 

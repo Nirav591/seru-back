@@ -2,10 +2,29 @@ const Exam = require('../models/exam.model');
 
 exports.createExam = async (req, res) => {
   try {
-    const examId = await Exam.create(req.body);
-    res.status(201).json({ message: 'Exam created', examId });
+    const { title, description, duration } = req.body;
+
+    // Required field check
+    if (!title || !description) {
+      return res.status(400).json({ message: 'Title and description are required.' });
+    }
+
+    // Check for duplicate title
+    const existing = await Exam.getByTitle(title.trim());
+    if (existing.length > 0) {
+      return res.status(409).json({ message: 'An exam with this title already exists.' });
+    }
+
+    // Create exam
+    const examId = await Exam.create({
+      title: title.trim(),
+      description: description.trim(),
+      duration: duration || 45
+    });
+
+    res.status(201).json({ message: 'Exam created successfully', examId });
   } catch (err) {
-    console.error(err);
+    console.error('Create Exam Error:', err);
     res.status(500).json({ message: 'Failed to create exam' });
   }
 };
