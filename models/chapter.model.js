@@ -18,8 +18,14 @@ const Chapter = {
   },
 
   getAll: async () => {
-    const [rows] = await db.query('SELECT * FROM chapters ORDER BY index_number ASC');
-    return rows;
+    const [rows] = await db.query(`
+        SELECT c.*, COUNT(q.id) AS questionCount
+        FROM chapters c
+        LEFT JOIN questions q ON c.id = q.chapter_id
+        GROUP BY c.id
+        ORDER BY c.index_number ASC
+      `);
+      return rows;
   },
 
   getById: async (id) => {
@@ -38,6 +44,19 @@ const Chapter = {
   delete: async (id) => {
     const [result] = await db.query('DELETE FROM chapters WHERE id = ?', [id]);
     return result;
+  },
+  getByIdWithCount: async (id) => {
+    // Get chapter data
+    const [chapterRows] = await db.query('SELECT * FROM chapters WHERE id = ?', [id]);
+    if (!chapterRows.length) return null;
+  
+    // Get question count
+    const [countRows] = await db.query('SELECT COUNT(*) AS questionCount FROM questions WHERE chapter_id = ?', [id]);
+  
+    return {
+      ...chapterRows[0],
+      questionCount: countRows[0].questionCount
+    };
   }
 };
 

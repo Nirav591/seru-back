@@ -33,20 +33,19 @@ exports.getAllChapters = async (req, res) => {
 };
 
 exports.getChapterById = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const chapter = await Chapter.getById(id);
-
-    if (chapter.length === 0) {
-      return res.status(404).json({ message: 'Chapter not found' });
+    try {
+      const chapter = await Chapter.getByIdWithCount(req.params.id);
+  
+      if (!chapter) {
+        return res.status(404).json({ message: 'Chapter not found' });
+      }
+  
+      res.json(chapter);
+    } catch (err) {
+      console.error('Error fetching chapter:', err);
+      res.status(500).json({ message: 'Server error' });
     }
-
-    res.status(200).json(chapter[0]);
-  } catch (err) {
-    console.error('Error fetching chapter:', err);
-    res.status(500).json({ message: 'Server error' });
-  }
-};
+  };
 
 exports.updateChapter = async (req, res) => {
     try {
