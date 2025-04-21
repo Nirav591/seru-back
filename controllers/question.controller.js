@@ -3,15 +3,15 @@ const Question = require('../models/question.model');
 exports.createQuestion = async (req, res) => {
     try {
       const chapter_id = req.params.id;
-      const { question, type, noOfAnswer, options } = req.body;
+      const { question } = req.body;
   
-      // ✅ Duplicate check
-      const existing = await Question.getByChapterAndText(chapter_id, question);
+      // Check for duplicate
+      const existing = await Question.findByTextAndChapter(chapter_id, question);
       if (existing.length > 0) {
-        return res.status(409).json({ message: 'This question already exists in this chapter.' });
+        return res.status(409).json({ message: 'Duplicate question in this chapter.' });
       }
   
-      const questionId = await Question.create({ chapter_id, question, type, noOfAnswer, options });
+      const questionId = await Question.create({ chapter_id, ...req.body });
       res.status(201).json({ message: 'Question created', questionId });
     } catch (err) {
       console.error(err);
@@ -65,17 +65,45 @@ exports.createBulkQuestions = async (req, res) => {
     const questions = req.body;
   
     try {
+      const errors = [];
+      const createdIds = [];
+      const seenQuestions = new Set(); // for internal duplicates
+  
       for (const q of questions) {
-        await Question.create({
+        const trimmedQuestion = q.question.trim();
+  
+        // Internal duplicate check
+        if (seenQuestions.has(trimmedQuestion.toLowerCase())) {
+          errors.push(`Internal duplicate skipped: "${trimmedQuestion}"`);
+          continue;
+        }
+  
+        // External (DB) duplicate check
+        const duplicate = await Question.findByTextAndChapter(chapter_id, trimmedQuestion);
+        if (duplicate.length > 0) {
+          errors.push(`Database duplicate skipped: "${trimmedQuestion}"`);
+          continue;
+        }
+  
+        // Passed checks, create it
+        const questionId = await Question.create({
           chapter_id,
-          question: q.question,
+          question: trimmedQuestion,
           type: q.type,
           noOfAnswer: q.noOfAnswer,
           options: q.options
         });
+  
+        createdIds.push(questionId);
+        seenQuestions.add(trimmedQuestion.toLowerCase());
       }
   
-      res.status(201).json({ message: 'Bulk questions created successfully' });
+      res.status(207).json({
+        message: 'Bulk insertion complete',
+        created: createdIds.length,
+        skipped: errors.length,
+        errors
+      });
     } catch (err) {
       console.error('Bulk insert error:', err);
       res.status(500).json({ message: 'Error inserting bulk questions' });

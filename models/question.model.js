@@ -70,6 +70,13 @@ const Question = {
       [chapter_id, questionText]
     );
     return rows;
+  },
+  findByTextAndChapter: async (chapter_id, questionText) => {
+    const [rows] = await db.query(
+      'SELECT * FROM questions WHERE chapter_id = ? AND question = ?',
+      [chapter_id, questionText]
+    );
+    return rows;
   }
 };
 
