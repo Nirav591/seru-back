@@ -13,5 +13,6 @@ router.post("/:chapterId/questions", chapterController.addQuestionsToChapter);
 router.get("/:id/questions", chapterController.getQuestionsByChapter);
 router.get("/:id/full", chapterController.getFullChapter);
 router.post("/:chapterId/questions", validate(questionsArraySchema), chapterController.addQuestionsToChapter);
+router.delete("/questions/:id", chapterController.deleteQuestion);
 
 module.exports = router;

@@ -208,3 +208,24 @@ exports.getFullChapter = async (req, res) => {
     }
   };
 
+
+  exports.deleteQuestion = async (req, res) => {
+    const questionId = req.params.id;
+  
+    try {
+      // First, delete all options related to this question
+      await db.execute("DELETE FROM options WHERE question_id = ?", [questionId]);
+  
+      // Then delete the question
+      const [result] = await db.execute("DELETE FROM questions WHERE id = ?", [questionId]);
+  
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ message: "Question not found" });
+      }
+  
+      res.status(200).json({ message: "Question deleted successfully" });
+    } catch (error) {
+      console.error("DB Error:", error);
+      res.status(500).json({ message: "Failed to delete question", error });
+    }
+  };
