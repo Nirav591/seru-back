@@ -3,7 +3,7 @@ const cors = require('cors');
 const app = express();
 
 // Your secret access key
-const accessKey = 'your-secret-string';
+const accessKey = 'solid-black';
 
 // CORS: allow only your frontend
 app.use(cors({
